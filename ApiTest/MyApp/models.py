@@ -37,7 +37,7 @@ class DB_apis(models.Model):
 	api_method =  models.CharField(max_length=10,null=True) 		#请求方式
 	api_url =  models.CharField(max_length=1000,null=True) 			#url
 	api_header =  models.CharField(max_length=1000,null=True) 		#请求头
-	api_login =  models.CharField(max_length=10,null=True) 			#是否带登陆态
+	api_login =  models.CharField(max_length=10,null=True) 			#是否带登录态
 	api_host =  models.CharField(max_length=100,null=True) 			#域名
 	des =  models.CharField(max_length=100,null=True) 				#描述
 	body_method =  models.CharField(max_length=20,null=True) 		#请求体编码格式

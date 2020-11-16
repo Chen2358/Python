@@ -21,7 +21,8 @@ def child_json(eid, oid=''):
 
 	if eid == 'P_apis.html':
 		project = DB_project.objects.filter(id=oid)[0]
-		res = {"project": project}
+		apis = DB_apis.objects.filter(project_id=oid)
+		res = {"project": project, 'apis': apis}
 
 	if eid == 'P_cases.html':
 		project = DB_project.objects.filter(id=oid)[0]
@@ -141,4 +142,10 @@ def save_project_set(requset,id):
     other_user = requset.GET['other_user']
     DB_project.objects.filter(id=project_id).update(name=name,remark=remark,other_user=other_user)
     return HttpResponse('')
+
+#新增接口
+def project_api_add(request,Pid):
+    project_id = Pid
+    DB_apis.objects.create(project_id=project_id)
+    return HttpResponseRedirect('/apis/%s/'%project_id)
 
