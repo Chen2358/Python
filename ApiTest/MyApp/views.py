@@ -2,10 +2,11 @@ from django.shortcuts import render
 from django.http import HttpResponse,HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from MyApp.models import *
+import json
 
 
 
-@login_required
+
 def welcome(request):
 	return render(request, 'welcome.html')
 
@@ -92,7 +93,7 @@ def logout(request):
 #吐槽
 def pei(request):
 	tucao_text = request.GET['tucao_text']
-	#写	入数据库
+	#写入数据库
 	DB_tucao.objects.create(user=request.user.username, text=tucao_text)
 	return HttpResponse('')
 
@@ -114,6 +115,7 @@ def add_project(request):
 def delect_project(request):
 	id = request.GET['id']
 	DB_project.objects.filter(id=id).delete()
+	DB_apis.objects.filter(project_id=id).delete()		#删除项目中的接口
 	return HttpResponse('')
 
 #进入接口库
@@ -135,7 +137,7 @@ def open_project_set(request, id):
 
 
 #保存项目设置	
-def save_project_set(requset,id):
+def save_project_set(requset, id):
     project_id = id
     name = requset.GET['name']
     remark = requset.GET['remark']
@@ -144,8 +146,56 @@ def save_project_set(requset,id):
     return HttpResponse('')
 
 #新增接口
-def project_api_add(request,Pid):
+def project_api_add(request, Pid):
     project_id = Pid
     DB_apis.objects.create(project_id=project_id)
     return HttpResponseRedirect('/apis/%s/'%project_id)
 
+#删除接口
+def project_api_del(request,id):
+    project_id = DB_apis.objects.filter(id=id)[0].project_id 			#根据接口ID查找所属项目ID
+    DB_apis.objects.filter(id=id).delete() 								#删除接口
+    return HttpResponseRedirect('/apis/%s/'%project_id)					#返回重定向的初始路由
+
+#保存接口备注
+def save_bz(request):
+	api_id = request.GET['api_id']
+	bz_value = request.GET['bz_value']
+	DB_apis.objects.filter(id=api_id).update(des=bz_value)				#更新数据库中接口备注
+	return HttpResponse('')
+
+#获取接口备注
+def get_bz(request):
+	api_id = request.GET['api_id']
+	bz_value = DB_apis.objects.filter(id=api_id)[0].des
+	return HttpResponse(bz_value)
+
+#保存接口数据
+def Api_save(request):
+    # 提取所有数据
+    api_id = request.GET['api_id']
+    ts_method = request.GET['ts_method']
+    ts_url = request.GET['ts_url']
+    ts_host = request.GET['ts_host']
+    ts_header = request.GET['ts_header']
+    ts_body_method = request.GET['ts_body_method']
+    ts_api_body = request.GET['ts_api_body']
+    api_name = request.GET['api_name']
+    # 保存数据
+    DB_apis.objects.filter(id=api_id).update(
+        api_method = ts_method,
+        api_url = ts_url,
+        api_header = ts_header,
+        api_host = ts_host,
+        body_method = ts_body_method,
+        api_body = ts_api_body,
+        name = api_name
+    )
+    # 返回
+    return HttpResponse('success')
+
+#获取接口数据
+def get_api_data(request):
+	api_id = request.GET['api_id']
+	api = DB_apis.objects.filter(id=api_id).values()[0]
+	return HttpResponse(json.dumps(api), content_type='application/child_json')

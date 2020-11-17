@@ -28,7 +28,7 @@
 	</table>
 	<script>
 		function delect_project(id){
-			if(confirm("确定删除该项目？") == false) {return}
+			if(confirm("删除项目时会同步删除项目中的接口，是否确定删除该项目？") == false) {return}
 			$.get('/delect_project/',{
 				'id':id
 			}, function(ret){

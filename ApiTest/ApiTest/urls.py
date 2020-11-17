@@ -20,6 +20,7 @@ from MyApp.views import *
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('welcome/', welcome),											#获取菜单	
+    re_path('^$',home),                                                 #index页
     path('home/', home),												#首页
     re_path(r"^child/(?P<eid>.+)/(?P<oid>.*)/$", child),				#返回子页面
     path('login/', login),												#登录界面
@@ -37,4 +38,10 @@ urlpatterns = [
     re_path(r"^project_set/(?P<id>.*)/$", open_project_set),			#进入项目设置
     re_path(r"^save_project_set/(?P<id>.*)/$", save_project_set),		#进入项目设置
     re_path(r"^project_api_add/(?P<Pid>.*)/$", project_api_add),        #新增接口
+    re_path(r"^project_api_del/(?P<id>.*)/$", project_api_del),         #删除接口
+    path("save_bz/", save_bz),                                          #保存接口备注
+    path("get_bz/", get_bz),                                            #获取接口备注
+    path("Api_save/", Api_save),                                        #保存接口数据
+    path("get_api_data/", get_api_data),                                #获取接口数据
+
 ]
