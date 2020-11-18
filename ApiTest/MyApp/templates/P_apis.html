@@ -3,14 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-    <style>
-        .wqrf_button{
-            background: linear-gradient(to top, #daffff, white);
-            border-radius: 5px;
-            border: 1px solid #353c48;
-            box-shadow: 4px 4px 4px grey;
-        }
-    </style>
 </head>
 <body>
 
@@ -41,16 +33,16 @@
              <tr>
                 <td>{{ i.id }}</td><td>{{ i.name }}</td> <td>{{ i.api_url }}</td>  <td>
                  <button onclick="ts_show('{{ i.id }}', '{{ i.name }}')" class="btn btn-success">调试</button>
-                 <button onclick="open_bz('{{ i.id }}')" class="wqrf_button">备注</button>
-                 <button class="wqrf_button">复制</button>
-                 <button class="wqrf_button">异常值测试</button>
+                 <button onclick="open_bz('{{ i.id }}')" class="btn btn-default">备注</button>
+                 <button onclick="copy_api('{{ i.id }}')" class="btn btn-default">复制</button>
+                 <button onclick="error_test('{{ i.id }}', '{{ i.api_body }}')" class="btn btn-default">异常值测试</button>
                  <button onclick="document.location.href='/project_api_del/{{ i.id }}/'" class="btn btn-danger">删除</button></td>
             </tr>
         {% endfor %}
     </tbody>
 </table>
 <div style="position: fixed;bottom: 0px; width: 100%;background-color: #f8f8f8;text-align: center; border: 1px solid #e7e7e7">
-    <div class="btn-group">
+    <div class="btn-group" style="z-index: 0">
         <button type="button" class="btn btn-primary" onclick="document.location.href='/project_api_add/{{ project.id }}/'">新增接口</button>
         <button type="button" class="btn btn-default">全局请求头</button>
         <button type="button" class="btn btn-default">全局域名</button>
@@ -60,6 +52,8 @@
         <button type="button" class="btn btn-default">登录态接口</button>
     </div>
 </div>
+
+
 
 <!--接口备注弹层及函数-->
 <div id="bz" style="display: none;width: 50%;height: 30%;position: fixed;left: 25%;top: 35%;background-color: #3c4043;box-shadow: 4px 4px 8px grey">
@@ -103,7 +97,7 @@
     </div>
 
     <h4>接口：<small style="color: greenyellow" id="ts_api_id"></small>-
-        <input id="ts_api_name" type="text" style="padding-left: 5px;width: 50%;color: #329104"></small>
+        <input id="ts_api_name" type="text" placeholder="请输入接口名称" style="padding-left: 5px;width: 50%;color: #329104"></small>
     </h4>
 
     <ul class="nav navbar-nav" style="width: 98%">
@@ -123,8 +117,8 @@
                    placeholder='url: 如 /abcd/efgh/' value="">
         </li>
 
-        <li >
-            <button type="button"
+        <li>
+            <button onclick="ts_send()" type="button"
                     style="height: 40px;width: 120px;"
                     class="btn btn-default"><span style="font-size: large">Send</span></button>
         </li>
@@ -155,18 +149,18 @@
 
     <ul id="myTab" class="nav nav-tabs" >
         <li class="active"><a id="click_none" href="#none" data-toggle="tab" >none</a></li>
-        <li ><a href="#form-data" data-toggle="tab" >form-data</a></li>
-        <li ><a href="#x-www-form-urlencoded" data-toggle="tab" >x-www-form-urlencoded</a></li>
+        <li ><a id="click_form-data" href="#form-data" data-toggle="tab" >form-data</a></li>
+        <li ><a id="click_x-www-form-urlencoded" href="#x-www-form-urlencoded" data-toggle="tab" >x-www-form-urlencoded</a></li>
         <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">raw <b class="caret"></b></a>
             <ul class="dropdown-menu" role="menu" aria-labelledby="myTabDrop1">
-                <li><a href="#Text" tabindex="-1" data-toggle="tab">Text</a></li>
-                <li><a href="#JavaScript" tabindex="-1" data-toggle="tab">JavaScript</a></li>
-                <li><a href="#Json" tabindex="-1" data-toggle="tab">Json</a></li>
-                <li><a href="#Html" tabindex="-1" data-toggle="tab">Html</a></li>
-                <li><a href="#Xml" tabindex="-1" data-toggle="tab">Xml</a></li>
+                <li><a id="click_Text" href="#Text" tabindex="-1" data-toggle="tab">Text</a></li>
+                <li><a id="click_JavaScript" href="#JavaScript" tabindex="-1" data-toggle="tab">JavaScript</a></li>
+                <li><a id="click_Json" href="#Json" tabindex="-1" data-toggle="tab">Json</a></li>
+                <li><a id="click_Html" href="#Html" tabindex="-1" data-toggle="tab">Html</a></li>
+                <li><a id="click_Xml" href="#Xml" tabindex="-1" data-toggle="tab">Xml</a></li>
             </ul>
-        <li ><a href="#response" data-toggle="tab" >返回体</a></li>
+        <li ><a id="click_response" href="#response" data-toggle="tab" >返回体</a></li>
     </ul>
     <div id="myTabContent" class="tab-content">
         <div class="tab-pane fade in active" style="text-align: center;color: grey" id="none">
@@ -280,6 +274,11 @@
     }
     //弹出调式框
     function ts_show(id, name){
+        //显示蒙层，并设置好蒙层的层级关系，让其在调试层之下，其他元素之上
+        document.getElementById('mengceng').style.display='block';
+        document.getElementById('mengceng').style.zIndex='998';
+        document.getElementById('ts').style.zIndex='999';
+
         clear_ts_api();
         document.getElementById('ts').style.display = 'block';
         document.getElementById('ts_api_id').innerText = id;
@@ -293,15 +292,66 @@
             document.getElementById('ts_url').value = ret.api_url;
             document.getElementById('ts_host').value = ret.api_host;
             document.getElementById('ts_header').value = ret.api_header;
-            // 请求体编码格式
-            var body_method = '#'+ret.body_method;
-            $("li a[href="+body_method+"]").click();
+            // 请求体编码格式，打开弹框后定位到对应的标签
+            var body_method = 'click_'+ret.body_method;                    
+            var body_method = body_method.replace('null', 'none');          //新增的接口 body_method=click_null
+            // console.log(body_method);
+            document.getElementById(body_method).click();
+            //请求体显示
+            if(ret.body_method == 'Text'){
+                document.getElementById('raw_Text').value = ret.api_body;
+            }
+            if(ret.body_method == 'JavaScript'){
+                document.getElementById('raw_JavaScript').value = ret.api_body;
+            }
+            if(ret.body_method == 'JSON'){
+                document.getElementById('raw_Json').value = ret.api_body;
+            }
+            if(ret.body_method == 'Html'){
+                document.getElementById('raw_Html').value = ret.api_body;
+            }
+            if(ret.body_method == 'Xml'){
+                document.getElementById('raw_Xml').value = ret.api_body;
+            }
+            
+            if(ret.body_method == 'form-data'){
+                var tbody = $('table#mytable tbody')[0];            // 定位表格中的tbody部分
+                body = eval(ret.api_body);                          //把这个像列表的字符串请求体变成真正的列表
+                for(var i=0;i<body.length;i++){                     // 遍历这个请求体列表
+                    key = body[i][0];                               //拿出每一个键值对的key
+                    value = body[i][1];                             //拿出每一个键值对的value
+                    var childs_tr = tbody.children;                 //获取到这个表格下面所有的tr组成的大列表
+                    // 每个tr下的children得到的是 td列表，只有两个
+                    childs_tr[i].children[0].innerText = key;       //第一个td放key
+                    childs_tr[i].children[1].innerText = value;     //第二个td放value
+                    //判断是否是最后一次遍历，来决定是否点击新增参数按钮
+                    if(i<body.length-1){
+                        document.getElementById('add').click()
+                    }
+                }
+            }
+            if(ret.body_method == 'x-www-form-urlencoded'){
+                var tbody = $('table#mytable2 tbody')[0];           // 定位表格中的tbody部分
+                body = eval(ret.api_body);                          //把这个像列表的字符串请求体变成真正的列表
+                for(var i=0;i<body.length;i++){                     // 遍历这个请求体列表
+                    key = body[i][0];                               //拿出每一个键值对的key
+                    value = body[i][1];                             //拿出每一个键值对的value
+                    var childs_tr = tbody.children;                 //获取到这个表格下面所有的tr组成的大列表
+                    // 每个tr下的children得到的是 td列表，只有两个
+                    childs_tr[i].children[0].innerText = key;       //第一个td放key
+                    childs_tr[i].children[1].innerText = value;     //第二个td放value
+                    //判断是否是最后一次遍历，来决定是否点击新增参数按钮
+                    if(i<body.length-1){
+                        document.getElementById('add2').click()
+                    }
+                }
+            }
 
         })
     }
     //取消
     function ts_close(){
-        document.getElementById("ts").style.display='none';
+        document.location.reload();
     }
     //保存
     function ts_save(){
@@ -312,7 +362,27 @@
         var ts_host = document.getElementById("ts_host").value;
         var ts_header = document.getElementById("ts_header").value;
 
-        //获取请求体类型
+        //判断顶部数据是否完整
+        if(api_name == ''){alert('请输入接口名称！');return}
+        if(ts_method == 'none'){alert('请输入请求方式！');return}
+        if(ts_url == ''){alert('请输入url！');return}
+        if(ts_host == ''){alert('请输入host！');return}
+
+        //判断关键数据是否符合规则
+        if(ts_host.slice(0,7) != 'http://' && ts_host.slice(0,8) != 'https://'){
+            alert('host必须以http://或https://开头！');return
+        }
+        if(ts_header != ''){
+            try{
+                JSON.parse(ts_header)
+            }catch (e){
+                alert('header请求头不符合json规范！');
+                return
+            }
+        }
+
+
+        //获取请求体类型及请求体
         var ts_body_method = $('ul#myTab li[class="active"]')[0].innerText;
         if(ts_body_method == 'none'){
             var ts_api_body = ''
@@ -370,7 +440,160 @@
             document.location.reload();                                         //刷新
         })
     }
+    //发送
+    function ts_send(){
+        //获取所有接口设置数据
+        var api_name = document.getElementById("ts_api_name").value;
+        var ts_method = document.getElementById("ts_method").value;
+        var ts_url = document.getElementById("ts_url").value;
+        var ts_host = document.getElementById("ts_host").value;
+        var ts_header = document.getElementById("ts_header").value;
 
+        //判断顶部数据是否完整
+        if(ts_method == 'none'){alert('请输入请求方式！');return}
+        if(ts_url == ''){alert('请输入url！');return}
+        if(ts_host == ''){alert('请输入host！');return}
+
+        //判断关键数据是否符合规则
+        if(ts_host.slice(0,7) != 'http://' && ts_host.slice(0,8) != 'https://'){
+            alert('host必须以http://或https://开头！');return
+        }
+        if(ts_header != ''){
+            try{
+                JSON.parse(ts_header)
+            }catch (e){
+                alert('header请求头不符合json规范！');
+                return
+            }
+        }
+
+        //获取请求体类型及请求体
+        var ts_body_method = $('ul#myTab li[class="active"]')[0].innerText;
+        
+        if(ts_body_method == 'none'){
+            var ts_api_body = ''
+        }
+        if(ts_body_method == 'form-data'){
+            var ts_api_body = []                            
+            var tbody_ = $('table#mytable tbody')[0];           //获取该表格中的内容
+            var trlist = tbody_.children;                       //获取下面的tr，每个tr是一个键值对
+            for(var i=0;i<trlist.length;i++){                   
+                var tdarr = trlist[i].children;                 //获取td
+                var key = tdarr[0].innerText;                   //获取key
+                var value = tdarr[1].innerText;                 //获取value
+                ts_api_body.push([key, value]);                 //作为数组存放
+            }
+            ts_api_body = JSON.stringify(ts_api_body);
+        }
+        if(ts_body_method == 'x-www-form-urlencoded'){
+            var ts_api_body = []                            
+            var tbody_ = $('table#mytable2 tbody')[0];          //获取该表格中的内容
+            var trlist = tbody_.children;                       //获取下面的tr，每个tr是一个键值对
+            for(var i=0;i<trlist.length;i++){                   
+                var tdarr = trlist[i].children;                 //获取td
+                var key = tdarr[0].innerText;                   //获取key
+                var value = tdarr[1].innerText;                 //获取value
+                ts_api_body.push([key, value]);                 //作为数组存放
+            }
+            ts_api_body = JSON.stringify(ts_api_body);
+        }
+        if(ts_body_method == 'Text'){
+            var ts_api_body = document.getElementById("raw_Text").value;
+        }
+        if(ts_body_method == 'JavaScript'){
+            var ts_api_body = document.getElementById("raw_JavaScript").value;
+        }
+        if(ts_body_method == 'Json'){
+            var ts_api_body = document.getElementById("raw_Json").value;
+        }
+        if(ts_body_method == 'Html'){
+            var ts_api_body = document.getElementById("raw_Html").value;
+        }
+        if(ts_body_method == 'Xml'){
+            var ts_api_body = document.getElementById("raw_Xml").value;
+        }
+        var api_id = document.getElementById('ts_api_id').innerText;            //获取接口id
+        $.get('/Api_send/',{
+            'api_id':api_id,
+            'api_name':api_name,
+            'ts_method':ts_method,
+            'ts_url':ts_url,
+            'ts_host':ts_host,
+            'ts_header':ts_header,
+            'ts_body_method':ts_body_method,
+            'ts_api_body':ts_api_body
+        }, function(ret){
+            document.getElementById("click_response").click();                  //点击返回体标签
+            document.getElementById('ts_response_body').value = ret             //把返回值显示到返回体中
+        })
+    }
+
+</script>
+
+<!--接口复制-->
+<script>
+    function copy_api(api_id){
+        $.get('/copy_api/',{
+            'api_id':api_id
+        }, function(ret){
+            document.location.reload()
+        })
+    }
+</script>
+
+<!--异常值测试-->
+<div id="error_div" style="display: none;border-radius:5px;width: 80%;
+position: absolute;left: 10%;top: 20%;background-color: #3c4043;box-shadow: 4px 4px 8px grey;
+color: white;padding-left: 10px;">
+
+    <div class="btn-group" style="float: right">
+        <button onclick="error_play()" type="button" class="btn btn-success">开始测试</button>
+        <button onclick="error_close()" type="button" class="btn btn-default">关闭</button>
+    </div>
+
+    <h4>接口：<small style="color: #0dff00" id="error_api_name"></small> 的异常值测试结果如下：</h4>
+
+    <strong>待替换数据:(用英文逗号隔开)</strong>
+    <input id="ready_error_data" type="text" style="color: black;border-radius: 5px;width: 99%"
+    value="'a',123,'',' ','./?*&^','中文'"> 
+    <br><br>
+    
+</div>
+<script>
+    function error_test(api_id, api_body){
+        //显示蒙层，并设置好蒙层的层级关系，让其在调试层之下，其他元素之上
+        document.getElementById('mengceng').style.display='block';
+        document.getElementById('mengceng').style.zIndex='998';
+        document.getElementById('error_div').style.zIndex='999';
+
+        error_clean();
+        document.getElementById('error_div').style.display='block';
+        document.getElementById('error_api_name').innerText = api_id;
+    }
+    function error_close(){
+        document.location.reload();
+    }
+    function error_clean() {
+        document.getElementById('error_div').innerHTML = ' <div class="btn-group" style="float: right">\n' +
+            '        <button onclick="error_play()" type="button" class="btn btn-success">开始测试</button>\n' +
+            '        <button onclick="error_close()" type="button" class="btn btn-default">关闭</button>\n' +
+            '    </div>\n' +
+            '\n' +
+            '    <h4>接口：<small style="color: #0dff00" id="error_api_name"></small> 的异常值测试结果如下：</h4>\n' +
+            '\n' +
+            '    <strong>待替换数据:(用英文逗号隔开)</strong>\n' +
+            '    <input id="ready_error_data" type="text" style="color: black;border-radius: 5px;width: 99%"\n' +
+            '    value="\'a\',123,\'\',\' \',\'./?*&^\',\'中文\'"\n' +
+            '    > <br><br>'
+    }
+</script>
+
+<!--蒙层-->
+<div id="mengceng" style="display: none;opacity:0.5;position: absolute;left: 0;top: 100px;
+                          background-color: gray;width: 100%">
+</div>
+<script>
+    document.getElementById('mengceng').style.height=window.screen.availHeight.toString()+'px';
 </script>
 
 
