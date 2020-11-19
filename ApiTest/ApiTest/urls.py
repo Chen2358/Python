@@ -22,7 +22,7 @@ urlpatterns = [
     path('welcome/', welcome),											#获取菜单	
     re_path('^$',home),                                                 #index页
     path('home/', home),												#首页
-    re_path(r"^child/(?P<eid>.+)/(?P<oid>.*)/$", child),				#返回子页面
+    re_path(r"^child/(?P<eid>.+)/(?P<oid>.*)/(?P<ooid>.*)/$", child),	#返回子页面
     path('login/', login),												#登录界面
     path('login_action/', login_action),								#登录
     path('register_action/', register_action),							#注册
@@ -45,5 +45,10 @@ urlpatterns = [
     path("get_api_data/", get_api_data),                                #获取接口数据
     path("Api_send/", Api_send),                                        #调试弹框发送请求
     path("copy_api/", copy_api),                                        #复制接口
+    path("error_request/", error_request),                              #调用异常测试接口
+    path("Api_send_home/", Api_send_home),                              #首页发送请求
+    path("get_home_log/", get_home_log),                                #获取最新的请求记录
+    path("get_api_log_home/", get_api_log_home),                        #获取完整单一请求记录
+    re_path(r"^home_log/(?P<log_id>.*)/$", home),                       #带着请求记录再次进入首页
 
 ]
