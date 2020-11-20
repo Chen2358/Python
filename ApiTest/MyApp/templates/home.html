@@ -1,16 +1,10 @@
 <!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <style>
-        body{
-            /*background: url("/static/home.jpg");*/
-            background-attachment: fixed;
-            background-size: cover;
-        }
-        a:hover{
-            color: red;
-        }
-</style>
+
+    </style>
 </head>
 <body >
     <h2 style="margin-left: 400px;color: #03c9fb;">欢迎使用 接口测试平台</h2>
@@ -19,16 +13,13 @@
 
     <div id="home_log_plan" style="padding-left: 20px;overflow-y: scroll;width: 320px">
         {% for i in home_log %}
-            <a href="/home_log/{{ i.id }}" style="text-decoration: none"  class="log" >
+            <a href="/home_log/{{ i.id }}/" style="text-decoration: none"  class="log" >
                 <span style="font-size: large;color: black">{{ i.api_method }}</span> -
                 {{ i.api_host }}{{ i.api_url }}
             </a> <br>
         {% endfor %}
     </div>
 
-    <div id="shu" style="width: 2px;background-color: #262c2c;position: absolute;top: 70px;left:340px;">
-        &nbsp;
-    </div>
 
     <div style="position: absolute;top: 100px;left: 380px;width: -webkit-calc(100% - 390px);">
         {# 调试弹层及函数 #}
@@ -44,7 +35,7 @@
             </li>
 
             <li style="width: -webkit-calc(100% - 225px)">
-                <input id="ts_url" style="color: black;padding-left: 10px;width: 100%;height: 40px;" type="text" placeholder='url: 如 /abcd/efgh/' value=" {{ log.api_url }}">
+                <input id="ts_url" style="color: black;padding-left: 10px;width: 100%;height: 40px;" type="text" placeholder='url: 如 /abcd/efgh/' value="{{ log.api_url }}">
             </li>
 
             <li >
@@ -79,16 +70,16 @@
         <br><br><br>
         <ul id="myTab" class="nav nav-tabs" >
             <li class="active"><a id="click_none" href="#none" data-toggle="tab" >none</a></li>
-            <li ><a href="#form-data" data-toggle="tab" >form-data</a></li>
-            <li ><a href="#x-www-form-urlencoded" data-toggle="tab" >x-www-form-urlencoded</a></li>
+            <li ><a id="click_form-data" href="#form-data" data-toggle="tab" >form-data</a></li>
+            <li ><a id="click_x-www-form-urlencoded" href="#x-www-form-urlencoded" data-toggle="tab" >x-www-form-urlencoded</a></li>
             <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">raw <b class="caret"></b></a>
                 <ul class="dropdown-menu" role="menu" aria-labelledby="myTabDrop1">
-                    <li><a href="#Text" tabindex="-1" data-toggle="tab">Text</a></li>
-                    <li><a href="#JavaScript" tabindex="-1" data-toggle="tab">JavaScript</a></li>
-                    <li><a href="#Json" tabindex="-1" data-toggle="tab">Json</a></li>
-                    <li><a href="#Html" tabindex="-1" data-toggle="tab">Html</a></li>
-                    <li><a href="#Xml" tabindex="-1" data-toggle="tab">Xml</a></li>
+                    <li><a id="click_Text" href="#Text" tabindex="-1" data-toggle="tab">Text</a></li>
+                    <li><a id="click_JavaScript" href="#JavaScript" tabindex="-1" data-toggle="tab">JavaScript</a></li>
+                    <li><a id="click_Json" href="#Json" tabindex="-1" data-toggle="tab">Json</a></li>
+                    <li><a id="click_Html" href="#Html" tabindex="-1" data-toggle="tab">Html</a></li>
+                    <li><a id="click_Xml" href="#Xml" tabindex="-1" data-toggle="tab">Xml</a></li>
                 </ul>
             </li>
             <li ><a id="click_response" href="#response" data-toggle="tab" >返回体</a></li>
@@ -160,6 +151,73 @@
             </div>
         </div>
         <br>
+
+        <script>
+            // 自动设置请求类型
+            if( "{{ log.api_method }}" != ''){
+                document.getElementById('ts_method').value = "{{ log.api_method }}";
+            }
+            //请求体
+            if("{{ log.body_method }}" != ''){
+                // console.log("{{ log.body_method }}");
+                // console.log("{{ log.api_body }}");
+
+                //点击请求体类型对应的标签
+                var body_method = 'click_'+"{{ log.body_method }}";
+                document.getElementById(body_method).click(); 
+
+                if("{{ log.body_method }}" == 'Text'){
+                    document.getElementById('raw_Text').value = "{{ log.api_body }}";
+                }
+                if("{{ log.body_method }}" == 'JavaScript'){
+                    document.getElementById('raw_JavaScript').value = "{{ log.api_body }}";
+                }
+                if("{{ log.body_method }}" == 'Json'){
+                    document.getElementById('raw_Json').value = "{{ log.api_body }}";
+                }
+                if("{{ log.body_method }}" == 'Html'){
+                    document.getElementById('raw_Html').value = "{{ log.api_body }}";
+                }
+                if("{{ log.body_method }}" == 'Xml'){
+                    document.getElementById('raw_Xml').value = "{{ log.api_body }}";
+                }
+                if("{{ log.body_method }}" == 'form-data'){
+                    var tbody = document.getElementById('mytbody');             // 定位表格中的tbody部分
+                    //把这个像列表的字符串请求体变成真正的列表
+                    body = eval("{{ log.api_body }}".replace(new RegExp('&quot;',"gm"),'"')); 
+                    for(var i=0;i<body.length;i++){                             // 遍历这个请求体列表
+                        key = body[i][0];                                       //拿出每一个键值对的key
+                        value = body[i][1];                                     //拿出每一个键值对的value
+                        var childs_tr = tbody.children;                         //获取到这个表格下面所有的tr组成的大列表
+                        // 每个tr下的children得到的是 td列表，只有俩个。
+                        childs_tr[i].children[0].innerText = key;               //第一个td放key
+                        childs_tr[i].children[1].innerText = value;             //第二个td放value
+                        //判断是否是最后一次遍历，来决定是否点击新增参数按钮
+                        if(i<body.length-1){
+                            document.getElementById('add').click()
+                        }
+                    }
+                }
+                if("{{ log.body_method }}" == 'x-www-form-urlencoded'){
+                    var tbody = document.getElementById('mytbody2');            // 定位表格中的tbody部分
+                    //把这个像列表的字符串请求体变成真正的列表
+                    body = eval("{{ log.api_body }}".replace(new RegExp('&quot;',"gm"),'"'));                          
+                    for(var i=0;i<body.length;i++){                             // 遍历这个请求体列表
+                        key = body[i][0];                                       //拿出每一个键值对的key
+                        value = body[i][1];                                     //拿出每一个键值对的value
+                        var childs_tr = tbody.children;                         //获取到这个表格下面所有的tr组成的大列表
+                        // 每个tr下的children得到的是 td列表，只有俩个。
+                        childs_tr[i].children[0].innerText = key;               //第一个td放key
+                        childs_tr[i].children[1].innerText = value;             //第二个td放value
+                        //判断是否是最后一次遍历，来决定是否点击新增参数按钮
+                        if(i<body.length-1){
+                            document.getElementById('add2').click()
+                        }
+                    }
+                }
+            }
+        </script>
+
         <script>
                 $('#mytable').SetEditable({
                     $addButton: $('#add'),
@@ -204,7 +262,7 @@
                         var ts_api_body = ''
                     }
                     if(ts_body_method == 'form-data'){
-                        var ts_api_body = []                            
+                        var ts_api_body = [];   							//新建这个空列表用来存放后续的数据                        
                         var tbody_ = $('table#mytable tbody')[0];           //获取该表格中的内容
                         var trlist = tbody_.children;                       //获取下面的tr，每个tr是一个键值对
                         for(var i=0;i<trlist.length;i++){                   
@@ -263,20 +321,20 @@
                     div.innerHTML = '';
                     // 生成新的
                     $.get('/get_home_log/',{
-                    },function (ret) {                                                  //ret是获取到的记录列表数组 的字符串形式
-                        //生成展示的代码
+                    },function (ret) {                                      //ret是获取到的记录列表数组 的字符串形式
+                        // 这里写生成展示的代码
                         console.log(ret);
                         var res = eval(ret);
                         var all_logs = res.all_logs;
                         for(var i=0; i<all_logs.length;i++){
-                            var a =document.createElement('a');                         //创建a标签
-                            a.href="/home_log/"+all_logs[i].id+"/" ;                     // 点击函数
+                            var a =document.createElement('a');             //创建a标签
+                            a.href="/home_log/"+all_logs[i].id+"/";         // 点击函数
                             a.style="text-decoration: none" ;
                             a.class = 'log';
-                            var s = document.createElement('span');                     //声明显示请求体类型的span
+                            var s = document.createElement('span');         //声明显示请求体类型的span
                             s.style = "font-size: large;color: black";
-                            s.innerText = all_logs[i].api_method+' - ';                 //设定method;
-                            var s2 = document.createElement('span');                    //声明存放host+url的span
+                            s.innerText = all_logs[i].api_method+' - ';     //设定这个method;
+                            var s2 = document.createElement('span');        // 声明存放host+url的span
                             s2.innerText = all_logs[i].api_host+all_logs[i].api_url;
                             a.appendChild(s);
                             a.appendChild(s2);
@@ -287,6 +345,11 @@
                 }
         </script>
     </div>
+
+
+<div id="shu" style="width: 2px;background-color: #262c2c;position: absolute;top: 70px;left:340px;">
+    &nbsp;
+</div>
 
 <!--根据浏览器高度自动设置高度-->
 <script>

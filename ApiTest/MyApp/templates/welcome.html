@@ -77,10 +77,10 @@
         </script>
 <div id="page1"></div>	
 <script>
-	$('#page1').load('/child/'+'{{ whichHTML }}/{{ oid }}/{{ ooid }}/');
+	$('#page1').load('/child/'+'{{ whichHTML }}/{{ oid }}/{{ ooid }}/')
 </script>
 <script>
-    if ( "{{whichHTML }}" != 'home.html'){
+    if( "{{ whichHTML }}" != 'Home.html' ){
         document.getElementById('menu_btn').click();
     }
     

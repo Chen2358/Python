@@ -32,7 +32,7 @@ urlpatterns = [
     path('help/', api_help),											#帮助
     path('project_list/', project_list),								#项目列表
     path('add_project/', add_project),									#增加项目
-    path('delect_project/', delect_project),							#删除项目
+    path('delete_project/', delete_project),							#删除项目
     re_path(r"apis/(?P<id>.*)/$", open_apis),							#进入项目
     re_path(r"^cases/(?P<id>.*)/$", open_cases),						#进入用例设置
     re_path(r"^project_set/(?P<id>.*)/$", open_project_set),			#进入项目设置
@@ -49,6 +49,10 @@ urlpatterns = [
     path("Api_send_home/", Api_send_home),                              #首页发送请求
     path("get_home_log/", get_home_log),                                #获取最新的请求记录
     path("get_api_log_home/", get_api_log_home),                        #获取完整单一请求记录
-    re_path(r"^home_log/(?P<log_id>.*)/$", home),                       #带着请求记录再次进入首页
+    re_path(r'^home_log/(?P<log_id>.*)/$', home),                       #带着请求记录再次进入首页
+    re_path(r"^add_case/(?P<eid>.*)/$", add_case),                      #新增用例
+    re_path(r'^del_case/(?P<eid>.*)/(?P<oid>.*)/$', del_case),          #删除用例
+    re_path(r'^copy_case/(?P<eid>.*)/(?P<oid>.*)/$', copy_case),        #复制用例
+    path("get_small/", get_small),                                      #获取小用例数据
 
 ]

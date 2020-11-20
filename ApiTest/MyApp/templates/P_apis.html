@@ -5,8 +5,7 @@
     <title>Title</title>
 </head>
 <body>
-
-<nav class="navbar navbar-default" role="navigation" style="position: absolute;top: 0px;left: 80px;width:-webkit-calc(100% - 200px);z-index: 1">
+<nav class="navbar navbar-default" role="navigation" style="position: absolute;top: 0px;left: 80px;width:-webkit-calc(100% - 200px);">
     <div class="container-fluid">
     <div class="navbar-header">
         <span style="font-size: xx-small" class="navbar-brand" >项目名称：{{ project.name }}</span>
@@ -18,6 +17,7 @@
             <li><a href="/cases/{{ project.id }}/">用例库</a></li>
             <li><a href="/project_set/{{ project.id }}/">项目设置</a></li>
         </ul>
+    </div>
     </div>
 </nav>
 <br><br>
@@ -34,11 +34,11 @@
                 <td>{{ i.id }}</td><td>{{ i.name }}</td> <td>{{ i.api_url }}</td>  
                 <td>
                     <div class="btn-group" style="z-index: 0">
-                         <button class="btn btn-success" onclick="ts_show('{{ i.id }}','{{ i.name }}')" >调试</button>
+                         <button class="btn btn-success" onclick="ts_show('{{ i.id }}','{{ i.name }}')">调试</button>
                          <button class="btn btn-default" onclick="open_bz('{{ i.id }}')" >备注</button>
                          <button class="btn btn-default" onclick="copy_api('{{ i.id }}')">复制</button>
                          <button class="btn btn-default" onclick="error_test('{{ i.id }}')">异常值测试</button>
-                         <button class="btn btn-danger" onclick="document.location.href='/project_api_del/{{ i.id }}/'" >删除
+                         <button class="btn btn-danger" onclick="document.location.href='/project_api_del/{{ i.id }}/'">删除
                          </button>
                     </div>
                 </td>
@@ -551,8 +551,10 @@
     }
 </script>
 
-<!--异常值测试-->
-<div id="error_div" style="display: none;border-radius:5px;width: 80%;position: absolute;left: 10%;top: 20%;background-color: #3c4043;box-shadow: 4px 4px 8px grey;color: white;padding-left: 10px;">
+{# 异常值测试 #}
+<div id="error_div" style="display: none;border-radius:5px;width: 80%;
+position: absolute;left: 10%;top: 10%;background-color: #3c4043;box-shadow: 4px 4px 8px grey;
+color: white;padding-left: 10px;">
 
     <div class="btn-group" style="float: right">
         <button onclick="error_play()" type="button" class="btn btn-success">开始测试</button>
@@ -658,7 +660,7 @@
         document.getElementById('error_api_body').value = api_body;
     }
     function error_close(){
-        document.location.reload();
+        document.location.reload()
     }
     function error_clean() {
         document.getElementById('error_div').innerHTML = ' <div class="btn-group" style="float: right">\n' +

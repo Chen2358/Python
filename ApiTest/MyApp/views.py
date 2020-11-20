@@ -6,8 +6,7 @@ import json
 import requests
 
 
-
-
+@login_required
 def welcome(request):
     return render(request, 'welcome.html')
 
@@ -18,10 +17,11 @@ def child_json(eid, oid='', ooid=''):
         data = DB_home_href.objects.all()
         home_log = DB_apis_log.objects.filter(user_id=oid)[::-1]
         if ooid == '':
-            res = {"hrefs": data, "home_log": home_log}
+            res = {"hrefs": data,"home_log": home_log}
         else:
             log = DB_apis_log.objects.filter(id=ooid)[0]
-            res = {"hrefs": data, "home_log": home_log}
+            res = {"hrefs": data,"home_log":home_log,"log":log}
+
     if eid == 'project_list.html':
         data = DB_project.objects.all()
         res = {"projects": data}
@@ -32,8 +32,10 @@ def child_json(eid, oid='', ooid=''):
         res = {"project": project, 'apis': apis}
 
     if eid == 'P_cases.html':
+        #从数据库中获取这个项目的所有大用例
         project = DB_project.objects.filter(id=oid)[0]
-        res = {"project": project}
+        Cases = DB_cases.objects.filter(project_id=oid)
+        res = {"project": project, "Cases": Cases}
 
     if eid == 'P_project_set.html':
         project = DB_project.objects.filter(id=oid)[0]
@@ -46,8 +48,14 @@ def child(request, eid, oid, ooid):
     res = child_json(eid, oid, ooid)
     return render(request, eid, res)
 
+# 进入主页
+@login_required
+def home(request,log_id=''):
+    return render(request,'welcome.html',{"whichHTML": "Home.html","oid":request.user.id,"ooid":log_id})
 
 
+
+# 进入登陆页面
 def login(request):
     return render(request, 'login.html')
 
@@ -85,10 +93,6 @@ def register_action(request):
     except:
         return HttpResponse('注册失败~用户名已存在')
 
-# 进入主页
-@login_required
-def home(request, log_id=''):
-    return render(request,'welcome.html',{"whichHTML": "Home.html","oid":request.user.id, "ooid": log_id})
 
 #退出
 def logout(request):
@@ -99,8 +103,7 @@ def logout(request):
 #吐槽
 def pei(request):
     tucao_text = request.GET['tucao_text']
-    #写入数据库
-    DB_tucao.objects.create(user=request.user.username, text=tucao_text)
+    new = DB_tucao.objects.create(user=request.user.username,text=tucao_text)
     return HttpResponse('')
 
 #帮助
@@ -118,10 +121,11 @@ def add_project(request):
     return HttpResponse('')
 
 #删除项目
-def delect_project(request):
+def delete_project(request):
     id = request.GET['id']
     DB_project.objects.filter(id=id).delete()
     DB_apis.objects.filter(project_id=id).delete()      #删除项目中的接口
+    DB_cases.objects.filter(project_id=id).delete()     #删除项目中的用例
     return HttpResponse('')
 
 #进入接口库
@@ -131,7 +135,6 @@ def open_apis(request, id):
 
 
 #进入用例设置
-
 def open_cases(request, id):
     project_id = id
     return render(request, 'welcome.html', {"whichHTML": "P_cases.html", "oid": project_id})
@@ -203,7 +206,7 @@ def Api_save(request):
         api_host = ts_host,
         body_method = ts_body_method,
         api_body = ts_api_body,
-        name = api_name
+        name = api_name,
     )
     # 返回
     return HttpResponse('success')
@@ -212,7 +215,7 @@ def Api_save(request):
 def get_api_data(request):
     api_id = request.GET['api_id']
     api = DB_apis.objects.filter(id=api_id).values()[0]
-    return HttpResponse(json.dumps(api), content_type='application/child_json')
+    return HttpResponse(json.dumps(api),content_type='application/json')
 
 #调试弹框发送请求
 def Api_send(request):
@@ -228,7 +231,7 @@ def Api_send(request):
         api = DB_apis.objects.filter(id=api_id)[0]
         ts_body_method = api.last_body_method
         ts_api_body = api.last_api_body
-        if ts_body_method in ['','none']:
+        if ts_body_method in ['',None]:
             return HttpResponse('请先选择好请求体编码格式和请求体，再点击Send按钮发送请求！')
     else:
         ts_api_body = request.GET['ts_api_body']
@@ -316,7 +319,7 @@ def copy_api(request):
                            last_body_method=old_api.last_body_method,
                            last_api_body = old_api.last_api_body
                            )
-                           
+    # 返回
     return HttpResponse('')
 
 
@@ -334,7 +337,11 @@ def error_request(request):
     host = api.api_host
     header = api.api_header
     body_method = api.body_method
-    header = json.loads(header)
+    try:
+        header = json.loads(header)
+    except:
+        return HttpResponse('请求头不符合json格式！')
+
     if host[-1] == '/' and url[0] =='/': #都有/
         url = host[:-1] + url
     elif host[-1] != '/' and url[0] !='/': #都没有/
@@ -367,7 +374,7 @@ def error_request(request):
         return HttpResponse(json.dumps(res_json),content_type='application/json')
     except:
         res_json = {"response": '对不起，接口未通！', "span_text": span_text}
-        # print(res_json)
+        print(res_json)
         return HttpResponse(json.dumps(res_json), content_type='application/json')
 
 # 首页发送请求
@@ -445,7 +452,7 @@ def Api_send_home(request):
         return HttpResponse(str(e))
 
 
-# 首页获取请求记录----方法未生效
+# 首页获取请求记录
 def get_home_log(request):
     user_id = request.user.id
     all_logs = DB_apis_log.objects.filter(user_id=user_id)
@@ -458,13 +465,30 @@ def get_api_log_home(request):
     log_id = request.GET['log_id']
     log = DB_apis_log.objects.filter(id=log_id)
     ret = {"log":list(log.values())[0]}
-    print(ret)
     return HttpResponse(json.dumps(ret),content_type='application/json')
 
+#新增用例
+def add_case(request, eid):
+    DB_cases.objects.create(project_id=eid, name='')
+    return HttpResponseRedirect('/cases/%s/' %eid)
 
+#删除用例
+def del_case(request, eid, oid):
+    DB_cases.objects.filter(id=oid).delete()
+    return HttpResponseRedirect('/cases/%s/' %eid)
 
+#复制用例
+def copy_case(request, eid, oid):
+    old_case = DB_cases.objects.filter(id=oid)[0]
+    DB_cases.objects.create(project_id=old_case.project_id, name=old_case.name + '_副本')
+    return HttpResponseRedirect('/cases/%s/' %eid)
 
-
+#获取小用例数据
+def get_small(request):
+    case_id = request.GET['case_id']
+    steps = DB_step.objects.filter(Case_id=case_id).order_by('index')
+    ret = {"all_steps": list(steps.values("id", "name"))}
+    return HttpResponse(json.dumps(ret), content_type='application/json')
 
 
 
