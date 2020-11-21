@@ -54,5 +54,11 @@ urlpatterns = [
     re_path(r'^del_case/(?P<eid>.*)/(?P<oid>.*)/$', del_case),          #删除用例
     re_path(r'^copy_case/(?P<eid>.*)/(?P<oid>.*)/$', copy_case),        #复制用例
     path("get_small/", get_small),                                      #获取小用例数据
+    path("user_upload/", user_upload),                                  #上传头像
+    path("add_new_step/", add_new_step),                                #增加小步骤接口
+    re_path(r"^delete_step/(?P<eid>.*)/$", delete_step),                #删除小步骤
+    path("get_step/", get_step),                                        #获取小步骤数据
+    path("save_step/", save_step),                                      #保存小步骤数据
+    path("step_get_api/", step_get_api),                                #步骤详情页获取接口数据
 
 ]

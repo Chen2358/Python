@@ -35,7 +35,8 @@ def child_json(eid, oid='', ooid=''):
         #从数据库中获取这个项目的所有大用例
         project = DB_project.objects.filter(id=oid)[0]
         Cases = DB_cases.objects.filter(project_id=oid)
-        res = {"project": project, "Cases": Cases}
+        apis = DB_apis.objects.filter(project_id=oid)
+        res = {"project": project, "Cases": Cases, "apis": apis}
 
     if eid == 'P_project_set.html':
         project = DB_project.objects.filter(id=oid)[0]
@@ -48,10 +49,17 @@ def child(request, eid, oid, ooid):
     res = child_json(eid, oid, ooid)
     return render(request, eid, res)
 
+#公共参数
+def glodict(request):
+    userimg = str(request.user.id) + '.jpg'                     #写死头像后缀，上传时强行转换未jpg后缀
+
+    res = {"username": request.user.username, "userimg": userimg}
+    return res
+
 # 进入主页
 @login_required
 def home(request,log_id=''):
-    return render(request,'welcome.html',{"whichHTML": "Home.html","oid":request.user.id,"ooid":log_id})
+    return render(request,'welcome.html',{"whichHTML": "Home.html","oid":request.user.id,"ooid":log_id, **glodict(request)})
 
 
 
@@ -108,11 +116,11 @@ def pei(request):
 
 #帮助
 def api_help(request):
-    return render(request, 'welcome.html', {"whichHTML": "help.html", "oid": ""})
+    return render(request, 'welcome.html', {"whichHTML": "help.html", "oid": "", **glodict(request)})
 
 #项目列表
 def project_list(request):
-    return render(request, 'welcome.html', {"whichHTML": "project_list.html", "oid": ""})
+    return render(request, 'welcome.html', {"whichHTML": "project_list.html", "oid": "", **glodict(request)})
 
 #新增项目
 def add_project(request):
@@ -125,25 +133,29 @@ def delete_project(request):
     id = request.GET['id']
     DB_project.objects.filter(id=id).delete()
     DB_apis.objects.filter(project_id=id).delete()      #删除项目中的接口
-    DB_cases.objects.filter(project_id=id).delete()     #删除项目中的用例
+
+    all_Cases = DB_cases.objects.filter(project_id=id)
+    for i in all_Cases:
+        DB_step.objects.filter(Case_id=i.id).delete()   #删除步骤
+        i.delete()                                      #删除用例
     return HttpResponse('')
 
 #进入接口库
 def open_apis(request, id):
     project_id = id
-    return render(request, 'welcome.html', {"whichHTML": "P_apis.html", "oid": project_id})
+    return render(request, 'welcome.html', {"whichHTML": "P_apis.html", "oid": project_id, **glodict(request)})
 
 
 #进入用例设置
 def open_cases(request, id):
     project_id = id
-    return render(request, 'welcome.html', {"whichHTML": "P_cases.html", "oid": project_id})
+    return render(request, 'welcome.html', {"whichHTML": "P_cases.html", "oid": project_id, **glodict(request)})
 
 
 #进入项目设置 
 def open_project_set(request, id):
     project_id = id
-    return render(request, 'welcome.html', {"whichHTML": "P_project_set.html", "oid": project_id})
+    return render(request, 'welcome.html', {"whichHTML": "P_project_set.html", "oid": project_id, **glodict(request)})
 
 
 #保存项目设置 
@@ -475,6 +487,7 @@ def add_case(request, eid):
 #删除用例
 def del_case(request, eid, oid):
     DB_cases.objects.filter(id=oid).delete()
+    DB_step.objects.filter(Case_id=oid).delete()
     return HttpResponseRedirect('/cases/%s/' %eid)
 
 #复制用例
@@ -487,15 +500,79 @@ def copy_case(request, eid, oid):
 def get_small(request):
     case_id = request.GET['case_id']
     steps = DB_step.objects.filter(Case_id=case_id).order_by('index')
-    ret = {"all_steps": list(steps.values("id", "name"))}
+    ret = {"all_steps": list(steps.values("index", "id", "name"))}
     return HttpResponse(json.dumps(ret), content_type='application/json')
 
+# 上传用户头像
+def user_upload(request):
+    file = request.FILES.get("fileUpload",None)                     #靠name获取上传的文件，如果没有，避免报错，设置成None
 
+    if not file:
+        return HttpResponseRedirect('/home/')                       #如果没有则返回到首页
 
+    new_name = str(request.user.id) + '.jpg'                        #设置好这个新图片的名字
+    destination = open("MyApp/static/user_img/"+new_name, 'wb+')    #打开特定的文件进行二进制的写操作
+    for chunk in file.chunks():                                     #分块写入文件
+        destination.write(chunk)
+    destination.close()
 
+    return HttpResponseRedirect('/home/')                           #返回到首页
 
+#增加小步骤
+def add_new_step(request):
+    Case_id = request.GET['Case_id']
+    all_len = len(DB_step.objects.filter(Case_id=Case_id))
+    DB_step.objects.create(Case_id=Case_id, name='我是新步骤', index=all_len+1)
+    return HttpResponse('')
 
+#删除小步骤
+def delete_step(request, eid):
+    step = DB_step.objects.filter(id=eid)[0]            #获取待删除的step
+    index = step.index                                  #待删除的step的index
+    Case_id = step.Case_id                              #待删除的step所属的大用例id
+    step.delete()                                       #删除step
 
+    for i in DB_step.objects.filter(Case_id=Case_id).filter(index__gt=index):   #遍历所有该大用例下的步骤中 顺序号大于目标index的步骤
+        i.index -= 1                                        #执行顺序自减1
+        i.save()
+
+    return HttpResponse('')
+
+#获取小步骤数据
+def get_step(request):
+    step_id = request.GET['step_id']
+    step = DB_step.objects.filter(id=step_id)
+    steplist = list(step.values())[0]
+    return HttpResponse(json.dumps(steplist), content_type='application/json')
+
+#保存小步骤数据
+def save_step(request):
+    step_id = request.GET['step_id']
+    name = request.GET['name']
+    index = request.GET['index']
+    step_method = request.GET['step_method']
+    step_url = request.GET['step_url']
+    step_host = request.GET['step_host']
+    step_header = request.GET['step_header']
+    step_body_method = request.GET['step_body_method']
+    step_api_body = request.GET['step_api_body']
+
+    DB_step.objects.filter(id=step_id).update(name=name,
+                                              index=index,
+                                              api_method=step_method,
+                                              api_url=step_url,
+                                              api_host=step_host,
+                                              api_header=step_header,
+                                              api_body_method=step_body_method,
+                                              api_body=step_api_body,
+                                              )
+    return HttpResponse('')
+
+#步骤详情页获取接口数据
+def step_get_api(request):
+    api_id = request.GET['api_id']
+    api = DB_apis.objects.filter(id=api_id).values()[0]
+    return HttpResponse(json.dumps(api), content_type='application/json')
 
 
 
