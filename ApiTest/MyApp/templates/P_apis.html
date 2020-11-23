@@ -21,7 +21,6 @@
     </div>
 </nav>
 <br><br>
-<br><br>
 <table class="table table-striped">
     <thead>
         <tr>
@@ -31,7 +30,7 @@
     <tbody>
          {% for i in apis %}
              <tr>
-                <td>{{ i.id }}</td><td>{{ i.name }}</td> <td>{{ i.api_url }}</td>  
+                <td>{{ i.id }}</td><td>{{ i.name }}</td> <td>{{ i.short_url }}</td>  
                 <td>
                     <div class="btn-group" style="z-index: 0">
                          <button class="btn btn-success" onclick="ts_show('{{ i.id }}','{{ i.name }}')">调试</button>
@@ -101,9 +100,8 @@
         <button onclick="ts_save()" type="button" class="btn btn-success">保存</button>
         <button onclick="ts_close()" type="button" class="btn btn-default">取消</button>
     </div>
-
-    <h4>接口：<small style="color: greenyellow" id="ts_api_id"></small>-
-        <input id="ts_api_name" type="text" placeholder="请输入接口名称" style="padding-left: 5px;width: 50%;color: #329104"></small>
+    <h4>接口: <small style="color: greenyellow" id="ts_api_id"></small>-
+    <input placeholder="请在此输入接口名称" type="text" id="ts_api_name" style="padding-left: 5px;width: 50%;color: #329104">
     </h4>
 
     <ul class="nav navbar-nav" style="width: 98%">
@@ -119,8 +117,7 @@
         </li>
 
         <li style="width: -webkit-calc(100% - 225px)">
-            <input id="ts_url" style="color: black;padding-left: 10px;width: 100%;height: 40px;" type="text"
-                   placeholder='url: 如 /abcd/efgh/' value="">
+            <input id="ts_url" style="color: black;padding-left: 10px;width: 100%;height: 40px;" type="text" placeholder='url: 如 /abcd/efgh/' value="">
         </li>
 
         <li>
@@ -143,11 +140,14 @@
     <br><br><br>
 
     <ul class="nav navbar-nav" style="width: 98%">
-        <li style="width: -webkit-calc(100% - 63px)">
-            <input id="ts_header" style="color: black;padding-left: 10px;width: 100%;height: 40px;" type="text" placeholder='header请求头: 如{"Content": "application/json"}' value="">
+        <li style="width:  -webkit-calc(100% - 63px)">
+             <input id="ts_header"  style="color: black;padding-left: 10px;width: 100%;height: 40px;" type="text"
+                   placeholder='header请求头：如{"Content":"application/json"}' value="">
         </li>
-        <li>
-            <button type="button" style="height: 40px;width: 60px;" class="btn btn-default">Clear</button>
+         <li >
+            <button type="button"
+                    style="height: 40px;width: 60px;"
+                    class="btn btn-default"><span>Clear</span></button>
         </li>
     </ul>
 
@@ -242,17 +242,16 @@
         </div>
 
         <div class="tab-pane fade" id="response">
-            <textarea name="" id="ts_response_body" disabled="disabled" style="color: black;width: 98%;height: 300px"></textarea>
+            <textarea name="" id="ts_response_body" disabled="disabled" style="background-color: #e4f3f5;color: black;width: 98%;height: 300px"></textarea>
         </div>
-
-        <br>
     </div>
+    <br>
 </div>
 <script>
     //清空数据
     function clear_ts_api(){
         document.getElementById('ts_api_id').innerText = '';
-        document.getElementById('ts_api_name').value = '';
+        document.getElementById('ts_api_name').innerText = '';
         document.getElementById('ts_method').value = 'none';
         document.getElementById('ts_url').value = '';
         document.getElementById('ts_host').value = '';
@@ -260,8 +259,8 @@
 
         //开始初始化请求体编码格式部分
         // document.getElementById('click_none').click();          //点击none子标签
-        document.getElementById('mytable').innerHTML='<tr><td></td><td></td></tr>'
-        document.getElementById('mytable2').innerHTML='<tr><td></td><td></td></tr>'
+        document.getElementById('mytbody').innerHTML='<tr><td></td><td></td></tr>'
+        document.getElementById('mytbody2').innerHTML='<tr><td></td><td></td></tr>'
 
         document.getElementById('raw_Text').value = '';
         document.getElementById('raw_JavaScript').value = '';
@@ -321,7 +320,7 @@
             }
             
             if(ret.body_method == 'form-data'){
-                var tbody = $('table#mytable tbody')[0];            // 定位表格中的tbody部分
+                var tbody = document.getElementById('mytbody');             // 定位表格中的tbody部分
                 body = eval(ret.api_body);                          //把这个像列表的字符串请求体变成真正的列表
                 for(var i=0;i<body.length;i++){                     // 遍历这个请求体列表
                     key = body[i][0];                               //拿出每一个键值对的key
@@ -337,7 +336,7 @@
                 }
             }
             if(ret.body_method == 'x-www-form-urlencoded'){
-                var tbody = $('table#mytable2 tbody')[0];           // 定位表格中的tbody部分
+                var tbody = document.getElementById('mytbody2');           // 定位表格中的tbody部分
                 body = eval(ret.api_body);                          //把这个像列表的字符串请求体变成真正的列表
                 for(var i=0;i<body.length;i++){                     // 遍历这个请求体列表
                     key = body[i][0];                               //拿出每一个键值对的key
@@ -496,7 +495,7 @@
             ts_api_body = JSON.stringify(ts_api_body);
         }
         if(ts_body_method == 'x-www-form-urlencoded'){
-            var ts_api_body = []                            
+            var ts_api_body = [];                          
             var tbody_ = $('table#mytable2 tbody')[0];          //获取该表格中的内容
             var trlist = tbody_.children;                       //获取下面的tr，每个tr是一个键值对
             for(var i=0;i<trlist.length;i++){                   

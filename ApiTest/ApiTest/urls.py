@@ -60,5 +60,7 @@ urlpatterns = [
     path("get_step/", get_step),                                        #获取小步骤数据
     path("save_step/", save_step),                                      #保存小步骤数据
     path("step_get_api/", step_get_api),                                #步骤详情页获取接口数据
+    path("Run_Case/", Run_Case),                                        #运行大用例
+    re_path(r"^look_report/(?P<eid>.*)/$", look_report),                #查看报告
 
 ]
