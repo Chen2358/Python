@@ -287,12 +287,28 @@
     <!--提取返回值-->
     <br>
     <textarea id="get_path" rows="3" style="width: 90%;background-color: rgba(245,236,222,0.29)" placeholder="提取返回值-路径法：
-参数名的字符串=路径 这种​方式提取,多个用换行分隔，例子如： name=/data/[3]/username; id=/data/[2]/userid"></textarea>
+参数名的字符串=路径 这种​方式提取,多个用换行分隔，例子如：
+name=/data/[3]/username
+id=/data/[2]/userid"></textarea>
     <textarea  id="get_zz"  rows="3" style="width: 90%;background-color: rgba(245,236,222,0.29)" placeholder="提取返回值-正则法：
-参数名的字符串=左边界字符串(.*?)右边界，多个用换行分隔，例子如： name=username':(.*?), id=d':(.*?),"></textarea>
-    <textarea  id="assert_zz"  rows="3" style="width: 90%;background-color: rgba(245,236,222,0.29)" placeholder="断言返回值-路径法"></textarea>
-    <textarea  id="assert_qz"  rows="3" style="width: 90%;background-color: rgba(245,236,222,0.29)" placeholder="断言返回值-正则法"></textarea>
-    <textarea  id="assert_path"  rows="3" style="width: 90%;background-color: rgba(245,236,222,0.29)" placeholder="断言返回值-全文检索"></textarea>
+参数名的字符串=左边界字符串(.*?)右边界，多个用换行分隔，例子如：
+name=username':(.*?),
+id=uid':(.*?),"></textarea>
+    <textarea  id="assert_path"  rows="3" style="width: 90%;background-color: rgba(245,236,222,0.29)" placeholder="断言返回值-路径法：
+路径=预期值,字符串必须写引号,等号右侧会被求值。 多个用换行分隔，例如：
+/data/[3]/username='wangzijia'
+/data/[2]/userid=0123
+/data=[1,2,3]"></textarea>
+    <textarea  id="assert_zz"  rows="3" style="width: 90%;background-color: rgba(245,236,222,0.29)" placeholder="断言返回值-正则法：
+左边界字符串(.*?)右边界 = 预期值，预期值全部会被按照字符串处理,所以请不要额外加引号，多个用换行分隔，例如：
+username':(.*?),='wangzijia'
+uid':(.*?),=12345"></textarea>
+    <textarea  id="assert_qz"  rows="3" style="width: 90%;background-color: rgba(245,236,222,0.29)" placeholder="断言返回值-全文检索：
+进行全文检索，存在即通过，全部按照字符串检索，不要加引号，多个用换行分隔，例如：
+123495
+请求成功
+code:200"></textarea>
+    <textarea  id="mock_res"  rows="5" style="width: 90%;background-color: rgba(245,236,222,0.29)" placeholder="若想mock(写死)返回值，请在此写好后保存。为空则不启用mock功能。"></textarea>
     <br><br><br><br>
 
     <p style="position: absolute;bottom: 0;left: 5px">
@@ -311,6 +327,7 @@
             document.getElementById('step_url').value = '';
             document.getElementById('step_host').value = '';
             document.getElementById('step_header').value='{}';
+            document.getElementById('mock_res').value='';
             // 开始初始化请求体编码格式部分：
             document.getElementById('mytbody').innerHTML='<tr>\n' +
                     '                                                <td></td>\n' +
@@ -435,6 +452,7 @@
             document.getElementById('step_url').value = ret.api_url;
             document.getElementById('step_host').value = ret.api_host;
             document.getElementById('step_header').value = ret.api_header;
+            document.getElementById('mock_res').value= ret.mock_res;
 
             document.getElementById('get_path').value = ret.get_path;
             document.getElementById('get_zz').value = ret.get_zz;
@@ -511,6 +529,7 @@
             var step_host = document.getElementById('step_host').value;
             var step_header = document.getElementById('step_header').value;
             var index = document.getElementById('step_index').value;
+            var mock_res = document.getElementById('mock_res').value;
             // 判断顶部的数据是否填充完
             if(name == ''){alert('请输入接口名字！');return}
             if(step_method == 'null'){alert('请选择请求方式！');return}
@@ -521,7 +540,7 @@
             if(step_host.slice(0,7) != 'http://' && step_host.slice(0,8) != 'https://'){
                 alert('host必须以http://或https://开头！');return
             }
-
+            /*
             if(step_header != ''){
                 if(step_header.slice(0,1) !='[' && step_header.slice(0,1) != '{'){
                     alert('header请求头不符合json规范！');
@@ -534,6 +553,7 @@
                     return
                 }
             }
+            */
             var step_body_method = $('ul#myTab li[class="active"]')[0].innerText;
 
             if(step_body_method == 'none'){
@@ -597,6 +617,7 @@
                     'step_header':step_header,
                     'step_body_method':step_body_method,
                     'step_api_body':step_api_body,
+                    'mock_res':mock_res,
 
                     'get_path':$("#get_path").val(),
                     'get_zz':$("#get_zz").val(),
@@ -625,6 +646,7 @@
         document.getElementById('step_url').value = '';
         document.getElementById('step_host').value = '';
         document.getElementById('step_header').value='{}';
+        document.getElementById('mock_res').value='';
         // 开始初始化请求体编码格式部分：
         document.getElementById('mytbody').innerHTML='<tr>\n' +
                 '                                                <td></td>\n' +

@@ -236,9 +236,9 @@ function showOutput(id, name) {
     <div style="border: 1px solid #ffffff;border-radius: 10px;box-shadow: 2px 2px 12px #aeaeae;padding-left: 30px;width: 500px">
 <p class='attribute'>接口自动化测试平台提供</p>
 <p class='attribute'><strong>注意:</strong> 出现问题请联系管理员！</p>
-<p class='attribute'><strong>报告生成日期:</strong> 2020-11-23 16:29:14</p>
-<p class='attribute'><strong>用例执行时间:</strong> 0:00:03.097071秒</p>
-<p class='attribute'><strong>用例执行结果:</strong> 通过 1,</p>
+<p class='attribute'><strong>报告生成日期:</strong> 2020-11-30 17:15:15</p>
+<p class='attribute'><strong>用例执行时间:</strong> 0:00:03.002574秒</p>
+<p class='attribute'><strong>用例执行结果:</strong> 报错 1</p>
 <p class='attribute'><strong>执行系统:</strong> win32</p>
 
 <br>
@@ -277,31 +277,38 @@ function showOutput(id, name) {
 
 </tr>
 
-<tr class='passClass'>
+<tr class='errorClass'>
     <td>MyApp.run_case.Test: 测试类</td>
     <td>1</td>
+    <td>0</td>
+    <td>0</td>
     <td>1</td>
-    <td>0</td>
-    <td>0</td>
     <td><button class="wqrf_button" style="background-color: #ffd1e7"  onclick="javascript:showClassDetail('c1',1)">详细</button></td>
 
 </tr>
 
-<tr id='pt1.1' class='hiddenRow'>
-    <td class='none'><div class='testcase'>test_001: work登录</div></td>
+<tr id='ft1.1' class='none'>
+    <td class='errorCase'><div class='testcase'>test_001: work登录</div></td>
     <td colspan='5' align='center'>
 
     <!--css div popup start-->
-    <a class="popup_liznk" onfocus='this.blur();' href="javascript:showTestDetail('div_pt1.1')" >
-        <button class="wqrf_button" style="width: auto">通过详情</button></a>
-    <div id='div_pt1.1' class="popup_window">
+    <a class="popup_liznk" onfocus='this.blur();' href="javascript:showTestDetail('div_ft1.1')" >
+        <button class="wqrf_button" style="width: auto">错误详情</button></a>
+    <div id='div_ft1.1' class="popup_window">
         <div style='text-align: right; color:red;cursor:pointer'>
-        <a onfocus='this.blur();' onclick="document.getElementById('div_pt1.1').style.display = 'none' " >
+        <a onfocus='this.blur();' onclick="document.getElementById('div_ft1.1').style.display = 'none' " >
            [x]</a>
         </div>
         <pre>
         
-pt1.1: /apis/login
+ft1.1: code=code":(.*?),
+Traceback (most recent call last):
+  File "D:\Tester\Scripts\TestDir\ApiTest\MyApp\run_case.py", line 174, in tool
+    Test.demo(self,step)
+  File "D:\Tester\Scripts\TestDir\ApiTest\MyApp\run_case.py", line 35, in demo
+    api_header = api_header.replace("##"+i+"##",repr(str(eval(i))))
+  File "&lt;string&gt;", line 1, in &lt;module&gt;
+NameError: name 'code' is not defined
 
 
          <div id="div100">
@@ -316,9 +323,9 @@ pt1.1: /apis/login
 <tr id='total_row'>
     <td>总计</td>
     <td>1</td>
+    <td>0</td>
+    <td>0</td>
     <td>1</td>
-    <td>0</td>
-    <td>0</td>
     <td><button class="wqrf_button" style="background-color: #ffc2e6" onclick='javascript:location.reload()'>刷新</button></td>
 
 </tr>
