@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse,HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from MyApp.models import *
 import json
@@ -10,17 +10,18 @@ import requests
 def welcome(request):
     return render(request, 'welcome.html')
 
-#控制不同的页面返回不同的数据：数据分发器
+
+# 控制不同的页面返回不同的数据：数据分发器
 def child_json(eid, oid='', ooid=''):
     res = {}
     if eid == 'Home.html':
         data = DB_home_href.objects.all()
         home_log = DB_apis_log.objects.filter(user_id=oid)[::-1]
         if ooid == '':
-            res = {"hrefs": data,"home_log": home_log}
+            res = {"hrefs": data, "home_log": home_log}
         else:
             log = DB_apis_log.objects.filter(id=ooid)[0]
-            res = {"hrefs": data,"home_log":home_log,"log":log}
+            res = {"hrefs": data, "home_log": home_log, "log": log}
 
     if eid == 'project_list.html':
         data = DB_project.objects.all()
@@ -30,7 +31,7 @@ def child_json(eid, oid='', ooid=''):
         project = DB_project.objects.filter(id=oid)[0]
         apis = DB_apis.objects.filter(project_id=oid)
 
-        #截断url
+        # 截断url
         for i in apis:
             try:
                 i.short_url = i.api_url.split('?')[0][:50]
@@ -40,7 +41,7 @@ def child_json(eid, oid='', ooid=''):
         res = {"project": project, 'apis': apis}
 
     if eid == 'P_cases.html':
-        #从数据库中获取这个项目的所有大用例
+        # 从数据库中获取这个项目的所有大用例
         project = DB_project.objects.filter(id=oid)[0]
         Cases = DB_cases.objects.filter(project_id=oid)
         apis = DB_apis.objects.filter(project_id=oid)
@@ -52,54 +53,59 @@ def child_json(eid, oid='', ooid=''):
 
     return res
 
-#返回子页面
+
+# 返回子页面
 def child(request, eid, oid, ooid):
     res = child_json(eid, oid, ooid)
     return render(request, eid, res)
 
-#公共参数
+
+# 公共参数
 def glodict(request):
-    userimg = str(request.user.id) + '.jpg'                     #写死头像后缀，上传时强行转换未jpg后缀
+    userimg = str(request.user.id) + '.jpg'  # 写死头像后缀，上传时强行转换未jpg后缀
 
     res = {"username": request.user.username, "userimg": userimg}
     return res
 
+
 # 进入主页
 @login_required
-def home(request,log_id=''):
-    return render(request,'welcome.html',{"whichHTML": "Home.html","oid":request.user.id,"ooid":log_id, **glodict(request)})
-
+def home(request, log_id=''):
+    return render(request, 'welcome.html',
+                  {"whichHTML": "Home.html", "oid": request.user.id, "ooid": log_id, **glodict(request)})
 
 
 # 进入登陆页面
 def login(request):
     return render(request, 'login.html')
 
-#登录
+
+# 登录
 def login_action(request):
     u_name = request.GET['username']
     p_word = request.GET['password']
 
-    #连通django用户表验证用户名、密码
+    # 连通django用户表验证用户名、密码
     from django.contrib import auth
 
     user = auth.authenticate(username=u_name, password=p_word)
     if user is not None:
-        #正确时
+        # 正确时
         # return HttpResponseRedirect('/home/')
         auth.login(request, user)
         request.session['user'] = u_name
         return HttpResponse('成功')
     else:
-        #错误时
+        # 错误时
         return HttpResponse('失败')
 
-#注册
+
+# 注册
 def register_action(request):
     u_name = request.GET['username']
     p_word = request.GET['password']
 
-    #连通django用户表，验证用户名、密码
+    # 连通django用户表，验证用户名、密码
     from django.contrib.auth.models import User
 
     try:
@@ -110,97 +116,108 @@ def register_action(request):
         return HttpResponse('注册失败~用户名已存在')
 
 
-#退出
+# 退出
 def logout(request):
     from django.contrib import auth
     auth.logout(request)
     return HttpResponseRedirect('/login/')
 
-#吐槽
+
+# 吐槽
 def pei(request):
     tucao_text = request.GET['tucao_text']
-    new = DB_tucao.objects.create(user=request.user.username,text=tucao_text)
+    new = DB_tucao.objects.create(user=request.user.username, text=tucao_text)
     return HttpResponse('')
 
-#帮助
+
+# 帮助
 def api_help(request):
     return render(request, 'welcome.html', {"whichHTML": "help.html", "oid": "", **glodict(request)})
 
-#项目列表
+
+# 项目列表
 def project_list(request):
     return render(request, 'welcome.html', {"whichHTML": "project_list.html", "oid": "", **glodict(request)})
 
-#新增项目
+
+# 新增项目
 def add_project(request):
     project_name = request.GET['project_name']
-    DB_project.objects.create(name=project_name,remark='', user=request.user.username, other_user='')
+    DB_project.objects.create(name=project_name, remark='', user=request.user.username, other_user='')
     return HttpResponse('')
 
-#删除项目
+
+# 删除项目
 def delete_project(request):
     id = request.GET['id']
     DB_project.objects.filter(id=id).delete()
-    DB_apis.objects.filter(project_id=id).delete()      #删除项目中的接口
+    DB_apis.objects.filter(project_id=id).delete()  # 删除项目中的接口
 
     all_Cases = DB_cases.objects.filter(project_id=id)
     for i in all_Cases:
-        DB_step.objects.filter(Case_id=i.id).delete()   #删除步骤
-        i.delete()                                      #删除用例
+        DB_step.objects.filter(Case_id=i.id).delete()  # 删除步骤
+        i.delete()  # 删除用例
     return HttpResponse('')
 
-#进入接口库
+
+# 进入接口库
 def open_apis(request, id):
     project_id = id
     return render(request, 'welcome.html', {"whichHTML": "P_apis.html", "oid": project_id, **glodict(request)})
 
 
-#进入用例设置
+# 进入用例设置
 def open_cases(request, id):
     project_id = id
     return render(request, 'welcome.html', {"whichHTML": "P_cases.html", "oid": project_id, **glodict(request)})
 
 
-#进入项目设置 
+# 进入项目设置
 def open_project_set(request, id):
     project_id = id
     return render(request, 'welcome.html', {"whichHTML": "P_project_set.html", "oid": project_id, **glodict(request)})
 
 
-#保存项目设置 
+# 保存项目设置
 def save_project_set(requset, id):
     project_id = id
     name = requset.GET['name']
     remark = requset.GET['remark']
     other_user = requset.GET['other_user']
-    DB_project.objects.filter(id=project_id).update(name=name,remark=remark,other_user=other_user)
+    DB_project.objects.filter(id=project_id).update(name=name, remark=remark, other_user=other_user)
     return HttpResponse('')
 
-#新增接口
+
+# 新增接口
 def project_api_add(request, Pid):
     project_id = Pid
     DB_apis.objects.create(project_id=project_id, api_method='none', api_url='')
-    return HttpResponseRedirect('/apis/%s/'%project_id)
+    return HttpResponseRedirect('/apis/%s/' % project_id)
 
-#删除接口
-def project_api_del(request,id):
-    project_id = DB_apis.objects.filter(id=id)[0].project_id            #根据接口ID查找所属项目ID
-    DB_apis.objects.filter(id=id).delete()                              #删除接口
-    return HttpResponseRedirect('/apis/%s/'%project_id)                 #返回重定向的初始路由
 
-#保存接口备注
+# 删除接口
+def project_api_del(request, id):
+    project_id = DB_apis.objects.filter(id=id)[0].project_id  # 根据接口ID查找所属项目ID
+    DB_apis.objects.filter(id=id).delete()  # 删除接口
+    return HttpResponseRedirect('/apis/%s/' % project_id)  # 返回重定向的初始路由
+
+
+# 保存接口备注
 def save_bz(request):
     api_id = request.GET['api_id']
     bz_value = request.GET['bz_value']
-    DB_apis.objects.filter(id=api_id).update(des=bz_value)              #更新数据库中接口备注
+    DB_apis.objects.filter(id=api_id).update(des=bz_value)  # 更新数据库中接口备注
     return HttpResponse('')
 
-#获取接口备注
+
+# 获取接口备注
 def get_bz(request):
     api_id = request.GET['api_id']
     bz_value = DB_apis.objects.filter(id=api_id)[0].des
     return HttpResponse(bz_value)
 
-#保存接口数据
+
+# 保存接口数据
 def Api_save(request):
     # 提取所有数据
     api_id = request.GET['api_id']
@@ -220,24 +237,26 @@ def Api_save(request):
 
     # 保存数据
     DB_apis.objects.filter(id=api_id).update(
-        api_method = ts_method,
-        api_url = ts_url,
-        api_header = ts_header,
-        api_host = ts_host,
-        body_method = ts_body_method,
-        api_body = ts_api_body,
-        name = api_name,
+        api_method=ts_method,
+        api_url=ts_url,
+        api_header=ts_header,
+        api_host=ts_host,
+        body_method=ts_body_method,
+        api_body=ts_api_body,
+        name=api_name,
     )
     # 返回
     return HttpResponse('success')
 
-#获取接口数据
+
+# 获取接口数据
 def get_api_data(request):
     api_id = request.GET['api_id']
     api = DB_apis.objects.filter(id=api_id).values()[0]
-    return HttpResponse(json.dumps(api),content_type='application/json')
+    return HttpResponse(json.dumps(api), content_type='application/json')
 
-#调试弹框发送请求
+
+# 调试弹框发送请求
 def Api_send(request):
     # 提取所有数据
     api_id = request.GET['api_id']
@@ -251,47 +270,46 @@ def Api_send(request):
         api = DB_apis.objects.filter(id=api_id)[0]
         ts_body_method = api.last_body_method
         ts_api_body = api.last_api_body
-        if ts_body_method in ['',None]:
+        if ts_body_method in ['', None]:
             return HttpResponse('请先选择好请求体编码格式和请求体，再点击Send按钮发送请求！')
     else:
         ts_api_body = request.GET['ts_api_body']
         api = DB_apis.objects.filter(id=api_id)
-        api.update(last_body_method=ts_body_method,last_api_body=ts_api_body)
+        api.update(last_body_method=ts_body_method, last_api_body=ts_api_body)
 
     # 发送请求获取返回值
     try:
-        header = json.loads(ts_header) #处理header
+        header = json.loads(ts_header)  # 处理header
     except:
         return HttpResponse('请求头不符合json格式！')
 
-
     # 拼接完整url
-    if ts_host[-1] == '/' and ts_url[0] =='/': #都有/
+    if ts_host[-1] == '/' and ts_url[0] == '/':  # 都有/
         url = ts_host[:-1] + ts_url
-    elif ts_host[-1] != '/' and ts_url[0] !='/': #都没有/
-        url = ts_host+ '/' + ts_url
-    else: #肯定有一个有/
+    elif ts_host[-1] != '/' and ts_url[0] != '/':  # 都没有/
+        url = ts_host + '/' + ts_url
+    else:  # 肯定有一个有/
         url = ts_host + ts_url
 
     try:
         if ts_body_method == 'none':
-            response = requests.request(ts_method.upper(), url, headers=header, data={} )
+            response = requests.request(ts_method.upper(), url, headers=header, data={})
 
         elif ts_body_method == 'form-data':
             files = []
             payload = {}
             for i in eval(ts_api_body):
                 payload[i[0]] = i[1]
-            response = requests.request(ts_method.upper(), url, headers=header, data=payload, files=files )
+            response = requests.request(ts_method.upper(), url, headers=header, data=payload, files=files)
 
         elif ts_body_method == 'x-www-form-urlencoded':
             header['Content-Type'] = 'application/x-www-form-urlencoded'
             payload = {}
             for i in eval(ts_api_body):
                 payload[i[0]] = i[1]
-            response = requests.request(ts_method.upper(), url, headers=header, data=payload )
+            response = requests.request(ts_method.upper(), url, headers=header, data=payload)
 
-        else:                                                   #肯定是raw的五个子选项
+        else:  # 肯定是raw的五个子选项
             if ts_body_method == 'Text':
                 header['Content-Type'] = 'text/plain'
 
@@ -315,29 +333,29 @@ def Api_send(request):
         return HttpResponse(str(e))
 
 
-#复制接口
+# 复制接口
 def copy_api(request):
     api_id = request.GET['api_id']
-    #查询就接口数据
+    # 查询就接口数据
     old_api = DB_apis.objects.filter(id=api_id)[0]
 
     DB_apis.objects.create(project_id=old_api.project_id,
-                           name = old_api.name+'_副本',
-                           api_method = old_api.api_method,
-                           api_url = old_api.api_url,
-                           api_header = old_api.api_header,
-                           api_login = old_api.api_login,
-                           api_host = old_api.api_host,
-                           des = old_api.des,
-                           body_method = old_api.body_method,
-                           api_body = old_api.api_body,
+                           name=old_api.name + '_副本',
+                           api_method=old_api.api_method,
+                           api_url=old_api.api_url,
+                           api_header=old_api.api_header,
+                           api_login=old_api.api_login,
+                           api_host=old_api.api_host,
+                           des=old_api.des,
+                           body_method=old_api.body_method,
+                           api_body=old_api.api_body,
                            result=old_api.result,
-                           sign = old_api.sign,
-                           file_key = old_api.file_key,
+                           sign=old_api.sign,
+                           file_key=old_api.file_key,
                            file_name=old_api.file_name,
                            public_header=old_api.public_header,
                            last_body_method=old_api.last_body_method,
-                           last_api_body = old_api.last_api_body
+                           last_api_body=old_api.last_api_body
                            )
     # 返回
     return HttpResponse('')
@@ -348,7 +366,7 @@ def error_request(request):
     api_id = request.GET['api_id']
     new_body = request.GET['new_body']
     span_text = request.GET['span_text']
-    #验证是否替换成功
+    # 验证是否替换成功
     # print(new_body)
 
     api = DB_apis.objects.filter(id=api_id)[0]
@@ -362,11 +380,11 @@ def error_request(request):
     except:
         return HttpResponse('请求头不符合json格式！')
 
-    if host[-1] == '/' and url[0] =='/': #都有/
+    if host[-1] == '/' and url[0] == '/':  # 都有/
         url = host[:-1] + url
-    elif host[-1] != '/' and url[0] !='/': #都没有/
-        url = host+ '/' + url
-    else: #肯定有一个有/
+    elif host[-1] != '/' and url[0] != '/':  # 都没有/
+        url = host + '/' + url
+    else:  # 肯定有一个有/
         url = host + url
 
     try:
@@ -390,12 +408,13 @@ def error_request(request):
 
         # 把返回值传递给前端页面
         response.encoding = "utf-8"
-        res_json = {"response":response.text,"span_text":span_text}
-        return HttpResponse(json.dumps(res_json),content_type='application/json')
+        res_json = {"response": response.text, "span_text": span_text}
+        return HttpResponse(json.dumps(res_json), content_type='application/json')
     except:
         res_json = {"response": '对不起，接口未通！', "span_text": span_text}
         print(res_json)
         return HttpResponse(json.dumps(res_json), content_type='application/json')
+
 
 # 首页发送请求
 def Api_send_home(request):
@@ -406,14 +425,14 @@ def Api_send_home(request):
     ts_header = request.GET['ts_header']
     ts_body_method = request.GET['ts_body_method']
     ts_api_body = request.GET['ts_api_body']
-    
+
     # 发送请求获取返回值
     try:
-        header = json.loads(ts_header)                          #处理header
+        header = json.loads(ts_header)  # 处理header
     except:
         return HttpResponse('请求头不符合json格式！')
-    
-    #写入数据库请求记录表中
+
+    # 写入数据库请求记录表中
     DB_apis_log.objects.create(user_id=request.user.id,
                                api_method=ts_method,
                                api_url=ts_url,
@@ -424,31 +443,31 @@ def Api_send_home(request):
                                )
 
     # 拼接完整url                                                           
-    if ts_host[-1] == '/' and ts_url[0] =='/':                  #都有/
+    if ts_host[-1] == '/' and ts_url[0] == '/':  # 都有/
         url = ts_host[:-1] + ts_url
-    elif ts_host[-1] != '/' and ts_url[0] !='/':                #都没有/
-        url = ts_host+ '/' + ts_url
-    else:                                                       #肯定有一个有/
+    elif ts_host[-1] != '/' and ts_url[0] != '/':  # 都没有/
+        url = ts_host + '/' + ts_url
+    else:  # 肯定有一个有/
         url = ts_host + ts_url
     try:
         if ts_body_method == 'none':
-            response = requests.request(ts_method.upper(), url, headers=header, data={} )
+            response = requests.request(ts_method.upper(), url, headers=header, data={})
 
         elif ts_body_method == 'form-data':
             files = []
             payload = {}
             for i in eval(ts_api_body):
                 payload[i[0]] = i[1]
-            response = requests.request(ts_method.upper(), url, headers=header, data=payload, files=files )
+            response = requests.request(ts_method.upper(), url, headers=header, data=payload, files=files)
 
         elif ts_body_method == 'x-www-form-urlencoded':
             header['Content-Type'] = 'application/x-www-form-urlencoded'
             payload = {}
             for i in eval(ts_api_body):
                 payload[i[0]] = i[1]
-            response = requests.request(ts_method.upper(), url, headers=header, data=payload )
+            response = requests.request(ts_method.upper(), url, headers=header, data=payload)
 
-        else:                                                   #这时肯定是raw的五个子选项：
+        else:  # 这时肯定是raw的五个子选项：
             if ts_body_method == 'Text':
                 header['Content-Type'] = 'text/plain'
 
@@ -476,84 +495,93 @@ def Api_send_home(request):
 def get_home_log(request):
     user_id = request.user.id
     all_logs = DB_apis_log.objects.filter(user_id=user_id)
-    ret = {"all_logs":list(all_logs.values("id","api_method","api_host","api_url"))[::-1] }
-    return HttpResponse(json.dumps(ret),content_type='application/json')
+    ret = {"all_logs": list(all_logs.values("id", "api_method", "api_host", "api_url"))[::-1]}
+    return HttpResponse(json.dumps(ret), content_type='application/json')
 
 
 # 获取完整的单一的请求记录数据
 def get_api_log_home(request):
     log_id = request.GET['log_id']
     log = DB_apis_log.objects.filter(id=log_id)
-    ret = {"log":list(log.values())[0]}
-    return HttpResponse(json.dumps(ret),content_type='application/json')
+    ret = {"log": list(log.values())[0]}
+    return HttpResponse(json.dumps(ret), content_type='application/json')
 
-#新增用例
+
+# 新增用例
 def add_case(request, eid):
     DB_cases.objects.create(project_id=eid, name='')
-    return HttpResponseRedirect('/cases/%s/' %eid)
+    return HttpResponseRedirect('/cases/%s/' % eid)
 
-#删除用例
+
+# 删除用例
 def del_case(request, eid, oid):
     DB_cases.objects.filter(id=oid).delete()
     DB_step.objects.filter(Case_id=oid).delete()
-    return HttpResponseRedirect('/cases/%s/' %eid)
+    return HttpResponseRedirect('/cases/%s/' % eid)
 
-#复制用例
+
+# 复制用例
 def copy_case(request, eid, oid):
     old_case = DB_cases.objects.filter(id=oid)[0]
     DB_cases.objects.create(project_id=old_case.project_id, name=old_case.name + '_副本')
-    return HttpResponseRedirect('/cases/%s/' %eid)
+    return HttpResponseRedirect('/cases/%s/' % eid)
 
-#获取小用例数据
+
+# 获取小用例数据
 def get_small(request):
     case_id = request.GET['case_id']
     steps = DB_step.objects.filter(Case_id=case_id).order_by('index')
     ret = {"all_steps": list(steps.values("index", "id", "name"))}
     return HttpResponse(json.dumps(ret), content_type='application/json')
 
+
 # 上传用户头像
 def user_upload(request):
-    file = request.FILES.get("fileUpload",None)                     #靠name获取上传的文件，如果没有，避免报错，设置成None
+    file = request.FILES.get("fileUpload", None)  # 靠name获取上传的文件，如果没有，避免报错，设置成None
 
     if not file:
-        return HttpResponseRedirect('/home/')                       #如果没有则返回到首页
+        return HttpResponseRedirect('/home/')  # 如果没有则返回到首页
 
-    new_name = str(request.user.id) + '.jpg'                        #设置好这个新图片的名字
-    destination = open("MyApp/static/user_img/"+new_name, 'wb+')    #打开特定的文件进行二进制的写操作
-    for chunk in file.chunks():                                     #分块写入文件
+    new_name = str(request.user.id) + '.jpg'  # 设置好这个新图片的名字
+    destination = open("MyApp/static/user_img/" + new_name, 'wb+')  # 打开特定的文件进行二进制的写操作
+    for chunk in file.chunks():  # 分块写入文件
         destination.write(chunk)
     destination.close()
 
-    return HttpResponseRedirect('/home/')                           #返回到首页
+    return HttpResponseRedirect('/home/')  # 返回到首页
 
-#增加小步骤
+
+# 增加小步骤
 def add_new_step(request):
     Case_id = request.GET['Case_id']
     all_len = len(DB_step.objects.filter(Case_id=Case_id))
-    DB_step.objects.create(Case_id=Case_id, name='我是新步骤', index=all_len+1)
+    DB_step.objects.create(Case_id=Case_id, name='我是新步骤', index=all_len + 1)
     return HttpResponse('')
 
-#删除小步骤
-def delete_step(request, eid):
-    step = DB_step.objects.filter(id=eid)[0]            #获取待删除的step
-    index = step.index                                  #待删除的step的index
-    Case_id = step.Case_id                              #待删除的step所属的大用例id
-    step.delete()                                       #删除step
 
-    for i in DB_step.objects.filter(Case_id=Case_id).filter(index__gt=index):   #遍历所有该大用例下的步骤中 顺序号大于目标index的步骤
-        i.index -= 1                                        #执行顺序自减1
+# 删除小步骤
+def delete_step(request, eid):
+    step = DB_step.objects.filter(id=eid)[0]  # 获取待删除的step
+    index = step.index  # 待删除的step的index
+    Case_id = step.Case_id  # 待删除的step所属的大用例id
+    step.delete()  # 删除step
+
+    for i in DB_step.objects.filter(Case_id=Case_id).filter(index__gt=index):  # 遍历所有该大用例下的步骤中 顺序号大于目标index的步骤
+        i.index -= 1  # 执行顺序自减1
         i.save()
 
     return HttpResponse('')
 
-#获取小步骤数据
+
+# 获取小步骤数据
 def get_step(request):
     step_id = request.GET['step_id']
     step = DB_step.objects.filter(id=step_id)
     steplist = list(step.values())[0]
     return HttpResponse(json.dumps(steplist), content_type='application/json')
 
-#保存小步骤数据
+
+# 保存小步骤数据
 def save_step(request):
     step_id = request.GET['step_id']
     name = request.GET['name']
@@ -570,7 +598,7 @@ def save_step(request):
 
     get_path = request.GET['get_path']
     get_zz = request.GET['get_zz']
-    
+
     assert_zz = request.GET['assert_zz']
     assert_qz = request.GET['assert_qz']
     assert_path = request.GET['assert_path']
@@ -593,20 +621,20 @@ def save_step(request):
                                               )
     return HttpResponse('')
 
-#步骤详情页获取接口数据
+
+# 步骤详情页获取接口数据
 def step_get_api(request):
     api_id = request.GET['api_id']
     print(api_id)
     api = DB_apis.objects.filter(id=api_id).values()[0]
     return HttpResponse(json.dumps(api), content_type='application/json')
 
-#查看报告
+
+# 查看报告
 def look_report(request, eid):
     Case_id = eid
 
-    return render(request,'Reports/%s.html' % Case_id)
-
-
+    return render(request, 'Reports/%s.html' % Case_id)
 
 
 # 运行大用例
@@ -617,9 +645,14 @@ def Run_Case(request):
 
     from MyApp.run_case import run
 
-    run(Case_id,Case.name, steps)
+    run(Case_id, Case.name, steps)
 
     return HttpResponse('')
 
 
-
+# 全局请求头
+def project_headers(request):
+    id = request.GET('project_id')
+    headers = DB_project_header.filter(project_id=id)[0]
+    print(headers)
+    return HttpResponse(headers)

@@ -107,3 +107,13 @@ class DB_step(models.Model):
 
     def __str__(self):
         return self.name
+
+class DB_project_header(models.Model):
+    '''全局请求头'''
+    project_id = models.CharField(max_length=10,null=True) #所属项目id
+    name = models.CharField(max_length=20,null=True) #请求头变量名字
+    key =  models.CharField(max_length=20,null=True) #请求头header的 key
+    value = models.TextField(null=True) #请求头的value，因为有可能cookie较大，达到几千字符，所以采用大文本方式存储
+
+    def __str__(self):
+        return self.name
