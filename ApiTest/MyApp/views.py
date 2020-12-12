@@ -37,8 +37,8 @@ def child_json(eid, oid='', ooid=''):
                 i.short_url = i.api_url.split('?')[0][:50]
             except:
                 i.short_url = ''
-
-        res = {"project": project, 'apis': apis}
+        project_header = DB_project_header.objects.filter(project_id=oid)
+        res = {"project": project, 'apis': apis, "project_header": project_header}
 
     if eid == 'P_cases.html':
         # 从数据库中获取这个项目的所有大用例
@@ -227,6 +227,7 @@ def Api_save(request):
     ts_header = request.GET['ts_header']
     api_name = request.GET['api_name']
     ts_body_method = request.GET['ts_body_method']
+    ts_project_headers = request.GET['ts_project_headers']
 
     if ts_body_method == '返回体':
         api = DB_apis.objects.filter(id=api_id)[0]
@@ -244,6 +245,7 @@ def Api_save(request):
         body_method=ts_body_method,
         api_body=ts_api_body,
         name=api_name,
+        public_header=ts_project_headers,
     )
     # 返回
     return HttpResponse('success')
@@ -266,6 +268,7 @@ def Api_send(request):
     ts_header = request.GET['ts_header']
     api_name = request.GET['api_name']
     ts_body_method = request.GET['ts_body_method']
+    ts_project_headers = request.GET['ts_project_headers'].split(',')
     if ts_body_method == '返回体':
         api = DB_apis.objects.filter(id=api_id)[0]
         ts_body_method = api.last_body_method
@@ -282,6 +285,10 @@ def Api_send(request):
         header = json.loads(ts_header)  # 处理header
     except:
         return HttpResponse('请求头不符合json格式！')
+
+    for i in ts_project_headers:
+        project_header = DB_project_header.objects.filter(id=i)[0]
+        header[project_header.key] = project_header.value
 
     # 拼接完整url
     if ts_host[-1] == '/' and ts_url[0] == '/':  # 都有/
@@ -656,3 +663,33 @@ def project_headers(request):
     headers = DB_project_header.filter(project_id=id)[0]
     print(headers)
     return HttpResponse(headers)
+
+
+# 保存请求头
+def save_project_header(request):
+    project_id = request.GET['project_id']
+    req_names = request.GET['req_names']
+    req_keys = request.GET['req_keys']
+    req_values = request.GET['req_values']
+    req_ids = request.GET['req_ids']
+
+    names = req_names.split(',')
+    keys = req_keys.split(',')
+    values = req_values.split(',')
+    ids = req_ids.split(',')
+
+
+    for i in range(len(ids)):
+        if names[i] != '':
+            if ids[i] == 'new':
+                DB_project_header.objects.create(project_id=project_id, name=names[i], key=keys[i], value=values[i])
+            else:
+                DB_project_header.objects.filter(id=ids[i]).update(name=names[i], key=keys[i], value=values[i])
+        else:
+            try:
+                DB_project_header.objects.filter(id=ids[i]).delete()
+            except:
+                pass
+
+    return HttpResponse('')
+

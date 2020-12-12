@@ -191,4 +191,3 @@ def run(Case_id, Case_name, steps):
     runner = HTMLTestRunner(fp, title='接口测试平台测试报告: %s' % Case_name, description='用例描述')
     runner.run(suit)
 
-# -----到85
