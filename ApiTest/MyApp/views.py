@@ -40,16 +40,17 @@ def child_json(eid, oid='', ooid=''):
         project_header = DB_project_header.objects.filter(project_id=oid)
         res = {"project": project, 'apis': apis, "project_header": project_header}
 
+    if eid == 'P_project_set.html':
+        project = DB_project.objects.filter(id= oid)[0]
+        res = {"project":project}
+
     if eid == 'P_cases.html':
         # 从数据库中获取这个项目的所有大用例
         project = DB_project.objects.filter(id=oid)[0]
         Cases = DB_cases.objects.filter(project_id=oid)
         apis = DB_apis.objects.filter(project_id=oid)
-        res = {"project": project, "Cases": Cases, "apis": apis}
-
-    if eid == 'P_project_set.html':
-        project = DB_project.objects.filter(id=oid)[0]
-        res = {"project": project}
+        project_header = DB_project_header.objects.filter(project_id=oid)
+        res = {"project": project, "Cases": Cases, "apis": apis, "project_header": project_header}
 
     return res
 
@@ -238,14 +239,14 @@ def Api_save(request):
 
     # 保存数据
     DB_apis.objects.filter(id=api_id).update(
-        api_method=ts_method,
-        api_url=ts_url,
-        api_header=ts_header,
-        api_host=ts_host,
-        body_method=ts_body_method,
-        api_body=ts_api_body,
-        name=api_name,
-        public_header=ts_project_headers,
+        api_method = ts_method,
+        api_url = ts_url,
+        api_header = ts_header,
+        api_host = ts_host,
+        body_method = ts_body_method,
+        api_body = ts_api_body,
+        name = api_name,
+        public_header = ts_project_headers
     )
     # 返回
     return HttpResponse('success')
@@ -597,6 +598,7 @@ def save_step(request):
     step_url = request.GET['step_url']
     step_host = request.GET['step_host']
     step_header = request.GET['step_header']
+    ts_project_headers = request.GET['ts_project_headers']
 
     mock_res = request.GET['mock_res']
 
@@ -616,6 +618,7 @@ def save_step(request):
                                               api_url=step_url,
                                               api_host=step_host,
                                               api_header=step_header,
+                                              public_header=ts_project_headers,
                                               mock_res=mock_res,
                                               api_body_method=step_body_method,
                                               api_body=step_api_body,
@@ -693,3 +696,9 @@ def save_project_header(request):
 
     return HttpResponse('')
 
+#保存用例名称
+def save_case_name(request):
+    id = request.GET['id']
+    name = request.GET['name']
+    DB_cases.objects.filter(id=id).update(name=name)
+    return HttpResponse('')

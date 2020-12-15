@@ -63,6 +63,7 @@ urlpatterns = [
     path("Run_Case/", Run_Case),                                        #运行大用例
     re_path(r"^look_report/(?P<eid>.*)/$", look_report),                #查看报告
     path("save_project_header/", save_project_header),                  #保存请求头
+    path("save_case_name/", save_case_name),                            #保存用例名称
 
 
 ]
