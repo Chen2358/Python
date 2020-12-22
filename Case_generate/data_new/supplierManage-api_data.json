@@ -1,0 +1,103 @@
+{
+    "_supplier": {},
+    "_supplier-address-info": {},
+    "_supplier-address-info_": {
+        "addressInfoVO": "addressInfoVO"
+    },
+    "_supplier-address-info__": {
+        "addressInfoVO": "addressInfoVO"
+    },
+    "_supplier-base-infos": {},
+    "_supplier-base-infos_": {
+        "supplierBaseInfoVO": "supplierBaseInfoVO"
+    },
+    "_supplier-base-infos__": {
+        "supplierBaseInfoVO": "supplierBaseInfoVO"
+    },
+    "_supplier-base-infos_check-status": {},
+    "_supplier-certification-infos": {},
+    "_supplier-certification-infos_batch": {
+        "supplierCertificationInfoVOList": "supplierCertificationInfoVOList"
+    },
+    "_supplier-certification-infos_certification-status": {},
+    "_supplier-contact-info": {},
+    "_supplier-contact-info_": {
+        "contactInfoVO": "contactInfoVO"
+    },
+    "_supplier-contact-info__": {
+        "contactInfoVO": "contactInfoVO"
+    },
+    "_supplier-device-desc-info_list": {},
+    "_supplier-device-info_{id}": {
+        "id": "id"
+    },
+    "_supplier-device-info_{id}_": {
+        "id": "id"
+    },
+    "_supplier-invoice-information": {},
+    "_supplier-invoice-information_": {
+        "invoiceInformationVO": "invoiceInformationVO"
+    },
+    "_supplier-invoice-information__": {
+        "invoiceInformationVO": "invoiceInformationVO"
+    },
+    "_supplier-invoice-information_check-status": {
+        "authenticationStatus": "authenticationStatus"
+    },
+    "_supplier_check-submit": {
+        "supplierCertificationType": "supplierCertificationType"
+    },
+    "_supplier_supplier-device-info": {
+        "all": "all",
+        "asc": "asc",
+        "brandName": "brandName",
+        "deviceModel": "deviceModel",
+        "deviceName": "deviceName",
+        "deviceParentType": "deviceParentType",
+        "deviceType": "deviceType",
+        "deviceTypeName": "deviceTypeName",
+        "formalData": "formalData",
+        "groupBy": "groupBy",
+        "id": "id",
+        "orderBy": "orderBy",
+        "pageNo": "pageNo",
+        "rows": "rows"
+    },
+    "_supplier_supplier-device-info_": {
+        "supplierDeviceInfoVO": "supplierDeviceInfoVO"
+    },
+    "_supplier_supplier-device-info__": {
+        "supplierDeviceInfoVO": "supplierDeviceInfoVO"
+    },
+    "_supplier_supplier-device-info_device-status": {
+        "deviceStatus": "deviceStatus"
+    },
+    "_supplier_supplier-device-info_update-idle-device-number": {
+        "id": "id",
+        "idleDeviceNumber": "idleDeviceNumber"
+    },
+    "_supplier_supplier-machinable-relation": {
+        "attributesType": "attributesType",
+        "supplierMachinableRelationVOList": "supplierMachinableRelationVOList"
+    },
+    "_supplier_supplier-operation-log": {
+        "all": "all",
+        "asc": "asc",
+        "businessType": "businessType",
+        "groupBy": "groupBy",
+        "logType": "logType",
+        "orderBy": "orderBy",
+        "pageNo": "pageNo",
+        "rows": "rows"
+    },
+    "_supplier_supplier-processing-capacity": {},
+    "_supplier_supplier-processing-capacity_": {
+        "supplierProcessingCapacityVO": "supplierProcessingCapacityVO"
+    },
+    "_supplier_supplier-processing-capacity__": {
+        "supplierProcessingCapacityVO": "supplierProcessingCapacityVO"
+    },
+    "_supplier_supplier-processing-capacity_auth-procession-status": {
+        "authProcessionStatus": "authProcessionStatus"
+    }
+}

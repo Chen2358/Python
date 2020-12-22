@@ -118,3 +118,21 @@ class DB_project_header(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class DB_host(models.Model):
+    '''域名'''
+    host = models.CharField(max_length=100, null=True)  #域名
+    des = models.CharField(max_length=100, null=True)   #描述
+
+    def __str__(self):
+        return self.host
+
+class DB_project_host(models.Model):
+    '''全局域名'''
+    project_id = models.CharField(max_length=100, null=True)        #所属项目id
+    name = models.CharField(max_length=20, null=True)
+    host = models.TextField(null=True)
+
+    def __str__(self):
+        return self.name

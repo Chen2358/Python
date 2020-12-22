@@ -38,7 +38,9 @@ def child_json(eid, oid='', ooid=''):
             except:
                 i.short_url = ''
         project_header = DB_project_header.objects.filter(project_id=oid)
-        res = {"project": project, 'apis': apis, "project_header": project_header}
+        hosts = DB_host.objects.all()
+        project_host = DB_project_host.objects.filter(project_id=oid)
+        res = {"project": project, 'apis': apis, "project_header": project_header, "hosts": hosts, "project_host": project_host}
 
     if eid == 'P_project_set.html':
         project = DB_project.objects.filter(id= oid)[0]
@@ -50,7 +52,9 @@ def child_json(eid, oid='', ooid=''):
         Cases = DB_cases.objects.filter(project_id=oid)
         apis = DB_apis.objects.filter(project_id=oid)
         project_header = DB_project_header.objects.filter(project_id=oid)
-        res = {"project": project, "Cases": Cases, "apis": apis, "project_header": project_header}
+        hosts = DB_host.objects.all()
+        project_host = DB_project_host.objects.filter(project_id=oid)
+        res = {"project": project, "Cases": Cases, "apis": apis, "project_header": project_header, "hosts": hosts, "project_host": project_host}
 
     return res
 
@@ -336,6 +340,9 @@ def Api_send(request):
 
         # 把返回值传递给前端页面
         response.encoding = "utf-8"
+
+        DB_host.objects.update_or_create(host=ts_host)
+
         return HttpResponse(response.text)
     except Exception as e:
         return HttpResponse(str(e))
@@ -494,6 +501,9 @@ def Api_send_home(request):
 
         # 把返回值传递给前端页面
         response.encoding = "utf-8"
+
+        DB_host.objects.update_or_create(host=ts_host)
+
         return HttpResponse(response.text)
     except Exception as e:
         return HttpResponse(str(e))
@@ -701,4 +711,26 @@ def save_case_name(request):
     id = request.GET['id']
     name = request.GET['name']
     DB_cases.objects.filter(id=id).update(name=name)
+    return HttpResponse('')
+
+# 保存项目公共域名
+def save_project_host(request):
+    project_id = request.GET['project_id']
+    req_names = request.GET['req_names']
+    req_hosts = request.GET['req_hosts']
+    req_ids = request.GET['req_ids']
+    names = req_names.split(',')
+    hosts = req_hosts.split(',')
+    ids = req_ids.split(',')
+    for i in range(len(ids)):
+        if names[i] != '':
+            if ids[i] == 'new':
+                DB_project_host.objects.create(project_id=project_id,name=names[i],host=hosts[i])
+            else:
+                DB_project_host.objects.filter(id=ids[i]).update(name=names[i],host=hosts[i])
+        else:
+            try:
+                DB_project_host.objects.filter(id=ids[i]).delete()
+            except:
+                pass
     return HttpResponse('')
