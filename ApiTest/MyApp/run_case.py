@@ -14,7 +14,7 @@ from MyApp.models import *
 
 
 class Test(unittest.TestCase):
-    '''测试类'''
+    """测试类"""
 
     def demo(self, step):
         time.sleep(3)
@@ -65,6 +65,11 @@ class Test(unittest.TestCase):
 
             ## 实际发送请求
 
+            # 处理host域名
+            if api_host[:4] == '全局域名':
+                project_host_id = api_host.split('-')[1]
+                api_host = DB_project_host.objects.filter(id=project_host_id)[0].host
+
             # 处理header
             try:
                 header = json.loads(api_header)
@@ -73,8 +78,9 @@ class Test(unittest.TestCase):
 
             # 遍历公共请求头,并加入到header字典中
             for i in ts_project_headers:
-                project_header = DB_project_header.objects.filter(id=i)[0]
-                header[project_header.key] = project_header.value
+                if i != '':
+                    project_header = DB_project_header.objects.filter(id=i)[0]
+                    header[project_header.key] = project_header.value
 
             ## 输出请求数据
             print('\n【host】：', api_host)
@@ -109,6 +115,17 @@ class Test(unittest.TestCase):
                 for i in eval(api_body):
                     payload[i[0]] = i[1]
                 response = requests.request(api_method.upper(), url, headers=header, data=payload)
+
+            elif api_body_method == 'GraphQL':
+                header['Content-Type'] = 'application/json'
+                query = api_body.split('*CJ*')[0]
+                graphql = api_body.split('*CJ*')[1]
+                try:
+                    eval(graphql)
+                except:
+                    graphql = {}
+                payload = '{"query": "%s", "variables": %s}' % (query, graphql)
+                response = requests.request(api_method.upper(), url, header=header, data=payload)
 
             else:  # 这时肯定是raw的五个子选项：
                 if api_body_method == 'Text':

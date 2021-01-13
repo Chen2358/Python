@@ -46,7 +46,7 @@
 	</div>
 	<script>
 		function add_project(){
-			project_name = document.getElementById("project_name").value;
+            var project_name = document.getElementById("project_name").value;
 			$.get('/add_project/',{
 				'project_name':project_name,
 			}, function(ret){

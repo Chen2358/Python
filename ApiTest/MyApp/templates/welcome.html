@@ -17,7 +17,10 @@
         <div style="color: white;margin-top: 10px;margin-bottom: 5px;text-align: center">
             欢迎你：<span>{{ username }}</span>
             <br>
-            <img src="/static/user_img/{{ userimg }}" alt="" style="width: 50%" class="img-circle img-thumbnail">
+            <img id="img_1" alt="" style="width: 50%" class="img-circle img-thumbnail">
+            <script>
+                document.getElementById("img_1").src="/static/user_img/{{ userimg }}";
+            </script>
             <a href="javascript:show_upload()" class="glyphicon glyphicon-pencil"></a>
         </div>
 
@@ -41,8 +44,15 @@
                 </li>
                 <li>
                     <a href="#">
-                        接口调试
+                        小工具
                     </a>
+                    <ul>
+                        <li>
+                            <a href="/tools_zhengjiao/">
+                                正交生成器
+                            </a>
+                        </li>
+                    </ul>
                 </li>
                 <li>
                     <a href="/help/">

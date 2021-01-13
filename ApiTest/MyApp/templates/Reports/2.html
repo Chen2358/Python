@@ -236,9 +236,9 @@ function showOutput(id, name) {
     <div style="border: 1px solid #ffffff;border-radius: 10px;box-shadow: 2px 2px 12px #aeaeae;padding-left: 30px;width: 500px">
 <p class='attribute'>接口自动化测试平台提供</p>
 <p class='attribute'><strong>注意:</strong> 出现问题请联系管理员！</p>
-<p class='attribute'><strong>报告生成日期:</strong> 2020-12-22 15:51:10</p>
-<p class='attribute'><strong>用例执行时间:</strong> 0:00:03.001594秒</p>
-<p class='attribute'><strong>用例执行结果:</strong> 报错 1</p>
+<p class='attribute'><strong>报告生成日期:</strong> 2021-01-11 15:18:51</p>
+<p class='attribute'><strong>用例执行时间:</strong> 0:00:06.063181秒</p>
+<p class='attribute'><strong>用例执行结果:</strong> 报错 2</p>
 <p class='attribute'><strong>执行系统:</strong> win32</p>
 
 <br>
@@ -279,11 +279,11 @@ function showOutput(id, name) {
 
 <tr class='errorClass'>
     <td>MyApp.run_case.Test: 测试类</td>
-    <td>1</td>
+    <td>2</td>
     <td>0</td>
     <td>0</td>
-    <td>1</td>
-    <td><button class="wqrf_button" style="background-color: #ffd1e7"  onclick="javascript:showClassDetail('c1',1)">详细</button></td>
+    <td>2</td>
+    <td><button class="wqrf_button" style="background-color: #ffd1e7"  onclick="javascript:showClassDetail('c1',2)">详细</button></td>
 
 </tr>
 
@@ -303,9 +303,9 @@ function showOutput(id, name) {
         
 ft1.1: 【返回体】： {"code":2000}
 Traceback (most recent call last):
-  File "D:\Tester\Scripts\ApiTestPlatform\Python\ApiTest\MyApp\run_case.py", line 193, in tool
+  File "D:\Tester\Scripts\ApiTestPlatform\Python\ApiTest\MyApp\run_case.py", line 210, in tool
     Test.demo(self, step)
-  File "D:\Tester\Scripts\ApiTestPlatform\Python\ApiTest\MyApp\run_case.py", line 149, in demo
+  File "D:\Tester\Scripts\ApiTestPlatform\Python\ApiTest\MyApp\run_case.py", line 166, in demo
     value = eval("%s%s" % (json.loads(res), py_path))
   File "&lt;string&gt;", line 1, in &lt;module&gt;
 KeyError: 'queryid'
@@ -320,12 +320,60 @@ KeyError: 'queryid'
     </td>
 </tr>
 
+<tr id='ft1.2' class='none'>
+    <td class='errorCase'><div class='testcase'>test_002: 我是新步骤</div></td>
+    <td colspan='5' align='center'>
+
+    <!--css div popup start-->
+    <a class="popup_liznk" onfocus='this.blur();' href="javascript:showTestDetail('div_ft1.2')" >
+        <button class="wqrf_button" style="width: auto">错误详情</button></a>
+    <div id='div_ft1.2' class="popup_window">
+        <div style='text-align: right; color:red;cursor:pointer'>
+        <a onfocus='this.blur();' onclick="document.getElementById('div_ft1.2').style.display = 'none' " >
+           [x]</a>
+        </div>
+        <pre>
+        
+ft1.2: 
+【host】： www.1234
+【url】： /aa/bb
+【header】： {}
+【method】： post
+【body_method】： none
+【body】： 
+Traceback (most recent call last):
+  File "D:\Tester\Scripts\ApiTestPlatform\Python\ApiTest\MyApp\run_case.py", line 210, in tool
+    Test.demo(self, step)
+  File "D:\Tester\Scripts\ApiTestPlatform\Python\ApiTest\MyApp\run_case.py", line 103, in demo
+    response = requests.request(api_method.upper(), url, headers=header, data={})
+  File "D:\Tester\Scripts\TestPlatformEnv\lib\site-packages\requests\api.py", line 61, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "D:\Tester\Scripts\TestPlatformEnv\lib\site-packages\requests\sessions.py", line 528, in request
+    prep = self.prepare_request(req)
+  File "D:\Tester\Scripts\TestPlatformEnv\lib\site-packages\requests\sessions.py", line 466, in prepare_request
+    hooks=merge_hooks(request.hooks, self.hooks),
+  File "D:\Tester\Scripts\TestPlatformEnv\lib\site-packages\requests\models.py", line 316, in prepare
+    self.prepare_url(url, params)
+  File "D:\Tester\Scripts\TestPlatformEnv\lib\site-packages\requests\models.py", line 390, in prepare_url
+    raise MissingSchema(error)
+requests.exceptions.MissingSchema: Invalid URL 'www.1234/aa/bb': No schema supplied. Perhaps you meant http://www.1234/aa/bb?
+
+
+         <div id="div100">
+        </div>
+        </pre>
+    </div> <br>
+    <!--css div popup end-->
+
+    </td>
+</tr>
+
 <tr id='total_row'>
     <td>总计</td>
-    <td>1</td>
+    <td>2</td>
     <td>0</td>
     <td>0</td>
-    <td>1</td>
+    <td>2</td>
     <td><button class="wqrf_button" style="background-color: #ffc2e6" onclick='javascript:location.reload()'>刷新</button></td>
 
 </tr>

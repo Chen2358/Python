@@ -50,7 +50,7 @@
                  <input id="ts_host"  style="color: black;padding-left: 10px;width: 100%;height: 40px;" type="text" placeholder='host: 如http(s)://xxxx.ccc.com' value="{{ log.api_host }}">
             </li>
              <li >
-                <button type="button"
+                <button type="button" onclick="ts_clear_host()"
                         style="height: 40px;width: 60px;"
                         class="btn btn-default"><span>Clear</span></button>
             </li>
@@ -62,7 +62,7 @@
                        placeholder='header请求头：如{"Content":"application/json"}' value="{{ log.api_header }}">
             </li>
              <li >
-                <button type="button"
+                <button type="button" onclick="ts_clear_header()"
                         style="height: 40px;width: 60px;"
                         class="btn btn-default"><span>Clear</span></button>
             </li>
@@ -82,7 +82,9 @@
                     <li><a id="click_Xml" href="#Xml" tabindex="-1" data-toggle="tab">Xml</a></li>
                 </ul>
             </li>
+            <li ><a id="click_GraphQL" href="#GraphQL" data-toggle="tab" >GraphQL</a></li>
             <li ><a id="click_response" href="#response" data-toggle="tab" >返回体</a></li>
+
         </ul>
         <div id="myTabContent" class="tab-content">
             <div class="tab-pane fade in active" id="none" style="text-align: center;color: grey">
@@ -145,6 +147,22 @@
             </div>
             <div class="tab-pane fade" id="Xml">
                 <textarea name="" id="raw_Xml" style="color: black;width: 98%;height: 300px"></textarea>
+            </div>
+            <div class="tab-pane fade" id="GraphQL">
+                 <table style="width: 98%">
+                   <thead>
+                        <tr>
+                            <td style="width: 55%"><span >QUERY</span></td>
+                            <td style="width: 40%"><span >GRAPHQL VARIABLES</span></td>
+                          </tr>
+                   </thead>
+                    <tbody>
+                      <tr>
+                        <td><textarea id="body_plan_G_Q"  rows="14" style="padding-left: 3px;border-radius: 5px;width: 99%"></textarea></td>
+                        <td><textarea id="body_plan_G_G"  rows="14" style="padding-left: 3px;border-radius: 5px;width: 100%"></textarea></td>
+                      </tr>
+                    </tbody>
+                </table>
             </div>
             <div class="tab-pane fade" id="response">
                 <textarea name="" id="ts_response_body" disabled="disabled" style="background-color: #e4f3f5;color: black;width: 98%;height: 300px"></textarea>
@@ -215,6 +233,12 @@
                         }
                     }
                 }
+                if("{{ log.body_method }}" == 'GraphQL'){
+                    body_plan_G_Q = "{{ log.api_body }}".split("*CJ*")[0];
+                    body_plan_G_G = "{{ log.api_body }}".split("*CJ*")[1];
+                    document.getElementById('body_plan_G_Q').value = body_plan_G_Q;
+                    document.getElementById('body_plan_G_G').value = body_plan_G_G;
+                }
             }
         </script>
 
@@ -271,6 +295,7 @@
                             var value = tdarr[1].innerText;                 //获取value
                             ts_api_body.push([key, value]);                 //作为数组存放
                         }
+                        // 转换为JSON格式
                         ts_api_body = JSON.stringify(ts_api_body);
                     }
                     if(ts_body_method == 'x-www-form-urlencoded'){
@@ -300,6 +325,11 @@
                     if(ts_body_method == 'Xml'){
                         var ts_api_body = document.getElementById("raw_Xml").value;
                     }
+                    if(ts_body_method == 'GraphQL'){
+                        body_plan_G_Q = document.getElementById("body_plan_G_Q").value;
+                        body_plan_G_G = document.getElementById("body_plan_G_G").value;
+                        var ts_api_body = body_plan_G_Q + "*CJ*" + body_plan_G_G
+                    }
                     //发送请求到后台
                     $.get('/Api_send_home/',{
                         'ts_method':ts_method,
@@ -309,6 +339,7 @@
                         'ts_body_method':ts_body_method,
                         'ts_api_body':ts_api_body
                     }, function(ret){
+						log_refersh();
                         document.getElementById("click_response").click();                  //点击返回体标签
                         document.getElementById('ts_response_body').value = ret             //把返回值显示到返回体中
                     })
@@ -342,6 +373,14 @@
                             div.appendChild(document.createElement('br'));
                         }
                     })
+                }
+                //清空host
+                function ts_clear_host(){
+                    document.getElementById('ts_host').value = '';
+                }
+                //清空header
+                function ts_clear_header(){
+                    document.getElementById('ts_header').value = '';
                 }
         </script>
     </div>
