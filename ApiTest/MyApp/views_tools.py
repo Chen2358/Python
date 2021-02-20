@@ -34,7 +34,7 @@ def zhengjiao_play(request):
 
     d = {"res": res}
 
-    return HttpResponse(json.dumps(d), content_type='application/json')
+    return HttpResponse(json.dumps(d), content_type="application/json")
 
 
 # 正交工具导出
