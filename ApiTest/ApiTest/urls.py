@@ -69,6 +69,8 @@ urlpatterns = [
     path("project_get_login/", project_get_login),                      #获取项目登录态接口
     path("project_login_save/", project_login_save),                    #保存项目登录态接口
     path("project_login_send/", project_login_send),                    #调试项目登录态接口
+    path("Home_save_api/", Home_save_api),                              #首页保存请求数据
+    re_path("^search/$", search),                                       #首页搜索
     path("tools_zhengjiao/", zhengjiao),                                #进入小工具页面
     path("zhengjiao_play/", zhengjiao_play),                            #正交工具运行
     path("zhengjiao_excel/", zhengjiao_excel),                          #正交工具导出

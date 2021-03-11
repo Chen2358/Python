@@ -105,9 +105,9 @@ class Test(unittest.TestCase):
             if api_login == 'yes':  # 需要判断
                 try:
                     eval("login_res")
-                    print('已调用过')
+                    # print('已调用过')
                 except:
-                    print('未调用过')
+                    # print('未调用过')
                     from MyApp.views import project_login_send_for_other
                     project_id = DB_cases.objects.filter(id=DB_step.objects.filter(id=step.id)[0].Case_id)[0].project_id
                     global login_res
@@ -170,7 +170,10 @@ class Test(unittest.TestCase):
                 except:
                     graphql = '{}'
                 payload = '{"query": "%s", "variables": %s}' % (query, graphql)
-                response = requests.request(api_method.upper(), url, header=header, data=payload)
+                if type(login_res) == dict:
+                    response = requests.request(api_method.upper(), url, header=header, data=payload)
+                else:
+                    response = login_res.request(api_method.upper(), url, header=header, data=payload)
 
             else:  # 这时肯定是raw的五个子选项：
                 if api_body_method == 'Text':
@@ -191,7 +194,10 @@ class Test(unittest.TestCase):
 
                 if api_body_method == 'Xml':
                     header['Content-Type'] = 'text/plain'
-                response = requests.request(api_method.upper(), url, headers=header, data=api_body.encode('utf-8'))
+                if type(login_res) == dict:
+                    response = requests.request(api_method.upper(), url, headers=header, data=api_body.encode('utf-8'))
+                else:
+                    response = login_res.request(api_method.upper(), url, headers=header, data=api_body.encode('utf-8'))
             response.encoding = "utf-8"
             res = response.text
             DB_host.objects.update_or_create(host=api_host)
