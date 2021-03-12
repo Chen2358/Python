@@ -60,12 +60,9 @@
     <div id="search_result" style="display: none;z-index: 999;position: absolute;top: 80px;left: 15%;width: 70%;min-height: 200px;
             background:linear-gradient(to bottom,#b8eafd,#e8ffdb) ;opacity:0.8;padding: 5px;
             border-radius: 2px;box-shadow: 4px 4px 8px #bcbcbc">
-        <strong>
-            <a href="">我是搜索结果1</a> <br>
-            <a href="">我是搜索结果2</a> <br>
-
-        </strong>
     </div>
+    <button id="search_close" onclick="search_close()" style="display: none;z-index: 999;position: absolute;
+    top: 80px;right: 15%;background-color: black;color: white;border-radius: 2px">close</button>
 
     <script>
         function search() {
@@ -82,6 +79,8 @@
                 'key':key
             },function (ret) {
                 // 把结果显示
+                document.getElementById('search_close').style.display='block';
+
                 var d = document.getElementById('search_result');
                 d.style.display = 'block';
                 results = ret.results; //ret.results是返回结果为列表
@@ -95,6 +94,10 @@
                     d.appendChild(document.createElement('br'))
                 }
             })
+        }
+        function search_close(){
+            document.getElementById('search_result').style.display='none';
+            document.getElementById('search_close').style.display='none';
         }
     </script>
 

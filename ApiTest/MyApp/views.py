@@ -80,6 +80,12 @@ def child_json(eid, oid='', ooid=''):
         res = {"project": project, "Cases": Cases, "apis": apis, "project_header": project_header, "hosts": hosts,
                "project_host": project_host}
 
+    if eid == 'P_global_data.html':
+        from django.contrib.auth.models import User
+        project = DB_project.objects.filter(id=oid)[0]
+        global_data = DB_global_data.objects.filter(user_id=project.user_id)
+        res = {"project": project, "global_data": global_data}
+        # print(res)
     return res
 
 
@@ -172,7 +178,7 @@ def project_list(request):
 # 新增项目
 def add_project(request):
     project_name = request.GET['project_name']
-    DB_project.objects.create(name=project_name, remark='', user=request.user.username, other_user='')
+    DB_project.objects.create(name=project_name, remark='', user=request.user.username, user_id=request.user.id, other_user='')
     return HttpResponse('')
 
 
@@ -1144,5 +1150,19 @@ def Home_save_api(request):
 def search(request):
     key = request.GET['key']
 
-    res = {"results":[{"url": '/aaa/', "text": 'aaa', "type": '项目名'}, {"url": '/bbb/', "text": 'bbb', "type": '接口名'}]}
+    # 项目名搜索
+    projects = DB_project.objects.filter(name__contains=key)  # 获取name包含key的所有项目
+    plist = [{"url": "/apis/%s/" % i.id, "text": i.name, "type": "project"} for i in projects]
+
+    # 接口名搜索
+    apis = DB_apis.objects.filter(name__contains=key)  # 获取name包含key的所有接口
+    alist = [{"url": "/apis/%s/" % i.project_id, "text": i.name, "type": "api"} for i in apis]
+
+    res = {"results": plist + alist}
     return HttpResponse(json.dumps(res), content_type='application/json')
+
+
+# 进入全局变量
+def global_data(request, id):
+    project_id = id
+    return render(request, 'welcome.html', {'whichHTML': "P_global_data.html", "oid": project_id, **glodict(request)})
