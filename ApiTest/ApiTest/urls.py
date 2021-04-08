@@ -72,6 +72,10 @@ urlpatterns = [
     path("Home_save_api/", Home_save_api),                              #首页保存请求数据
     re_path("^search/$", search),                                       #首页搜索
     re_path(r"^global_data/(?P<id>.*)/$", global_data),                 #进入全局变量
+    path("global_data_add/", global_data_add),                          #增加一条全局变量
+    path("global_data_delete/", global_data_delete),                    #删除一条全局变量
+    path("global_data_save/", global_data_save),                        #保存一条全局变量
+    path("global_data_change_check/", global_data_change_check),        #更改项目的生效变量
     path("tools_zhengjiao/", zhengjiao),                                #进入小工具页面
     path("zhengjiao_play/", zhengjiao_play),                            #正交工具运行
     path("zhengjiao_excel/", zhengjiao_excel),                          #正交工具导出

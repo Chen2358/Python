@@ -30,6 +30,7 @@ class DB_project(models.Model):
     user = models.CharField(max_length=15, null=True)  # 创建者名字
     user_id = models.CharField(max_length=10, null=True)    #项目创建者id
     other_user = models.CharField(max_length=200, null=True)  # 项目中其他成员
+    global_datas = models.CharField(max_length=100, null=True)  # 所生效的变量组的id列表
 
     def __str__(self):
         return self.name

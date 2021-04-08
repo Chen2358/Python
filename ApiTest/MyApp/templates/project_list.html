@@ -20,15 +20,15 @@
 		<tbody>
 			{% for i in projects %}
 				<tr>
-					<td>{{i.id }}</td><td>{{ i.name }}</td><td>{{ i.user }}</td><td>{{ i.remark }}</td><td><button onclick="javascript:document.location.href='/apis/{{ i.id }}/'" class="btn btn-success">进入</button> <button onclick="delect_project('{{ i.id }}')" class="btn btn-danger">删除</button></td>
+					<td>{{i.id }}</td><td>{{ i.name }}</td><td>{{ i.user }}</td><td>{{ i.remark }}</td><td><button onclick="javascript:document.location.href='/apis/{{ i.id }}/'" class="btn btn-success">进入</button> <button onclick="delete_project('{{ i.id }}')" class="btn btn-danger">删除</button></td>
 				</tr>
 			{% endfor %}
 		</tbody>
 	</table>
 	<script>
-		function delect_project(id){
+		function delete_project(id){
 			if(confirm("删除项目时会同步删除项目中的接口，是否确定删除该项目？") == false) {return}
-			$.get('/delect_project/',{
+			$.get('/delete_project/',{
 				'id':id
 			}, function(ret){
 				document.location.reload()
