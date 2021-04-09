@@ -31,7 +31,7 @@
     {% for i in global_data %}
         <button class="btn-danger" onclick="delete_one('{{ i.id }}')">删除</button>
         <button onclick="show('{{ i.id }}', '{{ i.name }}', '{{ i.data }}')" class="btn-default" style="margin-top: 5px;width: 150px">{{ i.name }}</button>
-        <input type="checkbox" id="check_{{ i.id }}" value="{{ i.id }}" name="check_names" onclick="change_check()">
+        <input type="checkbox" id="check_{{ i.id }}" value="{{ i.id }}" name="check_names" onchange="change_check()">
         <br>
         {#根据带进来的项目数据，来判断是否选中#}
         <script>
@@ -82,6 +82,7 @@
         }, function (ret){
             if(ret=='error'){
                 alert('无法保存！')
+                return
             }
             document.location.reload()
         })

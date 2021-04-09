@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+</head>
+<body>
+    <h1>首页</h1>
+    {#  vue写法 DOM  #}
+    <div id="links_div">
+        <div v-for="i in all_links">
+            {# 动态绑定，完整语法：「v-bind:」 #}
+            <a :href="[[ i.link_url ]]">[[ i.link_name ]]</a><br>
+        </div>
+    </div>
+    {#  vue写法 BOM  #}
+    <script>
+        var div = new Vue({
+            el: "#links_div", {# Vue对象与元素关联完成bom层 #}
+            delimiters: ["[[", "]]"], {# 声明变量形式 #}
+            data: {
+                all_links:{{ all_links|safe }}
+            }
+        })
+    </script>
+</body>
+</html>

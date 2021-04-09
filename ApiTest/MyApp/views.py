@@ -68,7 +68,7 @@ def child_json(eid, oid='', ooid=''):
 
     if eid == 'P_apis.html':
         project = DB_project.objects.filter(id=oid)[0]
-        apis = DB_apis.objects.filter(project_id=oid)
+        apis = DB_apis.objects.filter(project_id=oid).order_by('id')
 
         # 截断url
         for i in apis:
@@ -81,6 +81,7 @@ def child_json(eid, oid='', ooid=''):
         project_host = DB_project_host.objects.filter(project_id=oid)
         P_apis = Paginator(apis, 10, 1)
         page = ooid
+
         try:
             P_apis = P_apis.page(page)
         except PageNotAnInteger:
@@ -365,7 +366,7 @@ def Api_send(request):
     api_id = request.GET['api_id']
 
     project_id = DB_apis.objects.filter(id=api_id)[0].project_id
-
+    # print("project_id: ", project_id)
     ts_method = request.GET['ts_method']
     ts_url = request.GET['ts_url']          # 需要全局变量替换
     ts_url = global_datas_replace(project_id, ts_url)
